@@ -111,6 +111,12 @@ File-based Codex inbox packets are exported under:
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/open
 ```
 
+Completed packets are archived under:
+
+```text
+/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/done
+```
+
 ## Quick start
 
 ```bash

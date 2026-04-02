@@ -9,10 +9,12 @@ const POLL_INTERVAL_MS = Number(process.env.CODEX_INBOX_RELAY_INTERVAL_MS || 200
 const INBOX_PATH = path.join(DATA_DIR, "inbox.json");
 const RELAY_DIR = path.join(DATA_DIR, "codex-inbox");
 const OPEN_DIR = path.join(RELAY_DIR, "open");
+const DONE_DIR = path.join(RELAY_DIR, "done");
 const STATE_PATH = path.join(RELAY_DIR, "relay-state.json");
 
 async function main() {
   await fs.mkdir(OPEN_DIR, { recursive: true });
+  await fs.mkdir(DONE_DIR, { recursive: true });
   console.log(`codex-inbox-relay watching ${INBOX_PATH}`);
   console.log(`codex-inbox-relay output ${OPEN_DIR}`);
 
@@ -26,8 +28,9 @@ async function main() {
 
 async function tick() {
   const inbox = await readJson(INBOX_PATH, { ok: true, items: [] });
-  const state = await readJson(STATE_PATH, { exportedIds: [] });
+  const state = await readJson(STATE_PATH, { exportedIds: [], archivedIds: [] });
   const exportedIds = new Set(Array.isArray(state.exportedIds) ? state.exportedIds : []);
+  const archivedIds = new Set(Array.isArray(state.archivedIds) ? state.archivedIds : []);
   const items = Array.isArray(inbox.items) ? inbox.items : [];
   let changed = false;
 
@@ -43,12 +46,23 @@ async function tick() {
     changed = true;
   }
 
+  for (const item of items) {
+    if (!item?.id || item.status !== "completed" || archivedIds.has(item.id)) {
+      continue;
+    }
+
+    await archivePacket(item);
+    archivedIds.add(item.id);
+    changed = true;
+  }
+
   if (changed) {
     await fs.writeFile(
       STATE_PATH,
       JSON.stringify(
         {
           exportedIds: Array.from(exportedIds),
+          archivedIds: Array.from(archivedIds),
           updatedAt: new Date().toISOString(),
         },
         null,
@@ -58,7 +72,29 @@ async function tick() {
   }
 }
 
-function buildPacket(item) {
+async function archivePacket(item) {
+  const archivedPacket = buildPacket(item, {
+    status: "completed",
+    archivedAt: new Date().toISOString(),
+  });
+  await fs.writeFile(path.join(DONE_DIR, `${item.id}.json`), JSON.stringify(archivedPacket, null, 2));
+  await fs.writeFile(path.join(DONE_DIR, `${item.id}.md`), buildMarkdown(archivedPacket));
+  await removeIfPresent(path.join(OPEN_DIR, `${item.id}.json`));
+  await removeIfPresent(path.join(OPEN_DIR, `${item.id}.md`));
+}
+
+async function removeIfPresent(filePath) {
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+}
+
+function buildPacket(item, overrides = {}) {
   const payload = item?.record?.payload || {};
   const note = String(payload.note || "").trim();
   const title =
@@ -75,6 +111,7 @@ function buildPacket(item) {
     title,
     prompt: buildPrompt(item),
     payload,
+    ...overrides,
   };
 }
 
@@ -111,6 +148,7 @@ function buildMarkdown(packet) {
     `- status: ${packet.status}`,
     `- createdAt: ${packet.createdAt}`,
     `- exportedAt: ${packet.exportedAt}`,
+    ...(packet.archivedAt ? [`- archivedAt: ${packet.archivedAt}`] : []),
     "",
     "## Prompt",
     "",

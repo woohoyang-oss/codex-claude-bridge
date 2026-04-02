@@ -6,6 +6,7 @@ Local relay that converts extension bridge inbox items into file-based Codex inb
 
 - watch `/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/inbox.json`
 - export each unseen handoff or action-request as a packet under `codex-inbox/open/`
+- move completed items from `codex-inbox/open/` to `codex-inbox/done/`
 - generate both `.json` and `.md` variants for easy inspection or downstream automation
 
 ## Run
@@ -19,6 +20,12 @@ Default output directory:
 
 ```text
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/open
+```
+
+Completed packets are archived under:
+
+```text
+/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/done
 ```
 
 ## Environment
