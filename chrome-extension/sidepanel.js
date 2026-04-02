@@ -7,6 +7,7 @@ const elements = {
   pickedActionText: document.querySelector("#picked-action-text"),
   pickedActionNote: document.querySelector("#picked-action-note"),
   inboxSummary: document.querySelector("#inbox-summary"),
+  inboxList: document.querySelector("#inbox-list"),
   inboxOutput: document.querySelector("#inbox-output"),
   bridgeUrl: document.querySelector("#bridge-url"),
   handoffNote: document.querySelector("#handoff-note"),
@@ -47,6 +48,7 @@ function bindEvents() {
     })
   );
   elements.refreshInbox.addEventListener("click", () => void refreshInbox());
+  elements.inboxList.addEventListener("click", (event) => void handleInboxAction(event));
   elements.pushBridge.addEventListener("click", () => void pushBridge());
   elements.pushPicked.addEventListener("click", () => void pushPickedElement());
   elements.createHandoff.addEventListener("click", () => void createHandoff());
@@ -142,6 +144,7 @@ async function refreshInbox() {
   const result = await sendRuntimeMessage({ type: "bridge:get-inbox" });
   if (!result.ok) {
     elements.inboxSummary.textContent = result.error || "Inbox fetch failed.";
+    elements.inboxList.innerHTML = "";
     elements.inboxOutput.textContent = "No inbox data loaded.";
     return;
   }
@@ -151,7 +154,72 @@ async function refreshInbox() {
   const claimed = items.filter((item) => item?.status === "claimed").length;
   const completed = items.filter((item) => item?.status === "completed").length;
   elements.inboxSummary.textContent = `${items.length} items total, ${pending} pending, ${claimed} claimed, ${completed} completed.`;
+  renderInboxItems(items.slice(0, 6));
   elements.inboxOutput.textContent = JSON.stringify(items.slice(0, 8), null, 2);
+}
+
+function renderInboxItems(items) {
+  if (!items.length) {
+    elements.inboxList.innerHTML = "<p class=\"muted\">No inbox items yet.</p>";
+    return;
+  }
+
+  elements.inboxList.innerHTML = items
+    .map((item) => {
+      const note = item?.record?.payload?.note || "(no note)";
+      const kind = item?.kind || "item";
+      const status = item?.status || "unknown";
+      const createdAt = item?.createdAt || "";
+      return `
+        <article class="inbox-item">
+          <div class="inbox-item-header">
+            <span class="inbox-chip">${escapeHtml(kind)}</span>
+            <span class="inbox-chip">${escapeHtml(status)}</span>
+          </div>
+          <div class="inbox-note">${escapeHtml(note)}</div>
+          <div class="inbox-meta">${escapeHtml(createdAt)}</div>
+          <div class="inbox-actions">
+            <button class="ghost" data-inbox-action="claim" data-item-id="${escapeHtml(String(item.id || ""))}">Claim</button>
+            <button class="ghost" data-inbox-action="complete" data-item-id="${escapeHtml(String(item.id || ""))}">Complete</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function handleInboxAction(event) {
+  const button = event.target instanceof HTMLElement ? event.target.closest("[data-inbox-action]") : null;
+  if (!button) {
+    return;
+  }
+
+  const itemId = button.getAttribute("data-item-id") || "";
+  const status = button.getAttribute("data-inbox-action") || "";
+  if (!itemId || !status) {
+    return;
+  }
+
+  const result = await sendRuntimeMessage({
+    type: "bridge:update-inbox-item",
+    itemId,
+    status,
+  });
+  if (!result.ok) {
+    elements.bridgeStatus.textContent = result.payload?.error || result.error || "Inbox update failed.";
+    return;
+  }
+  elements.bridgeStatus.textContent = `Inbox item ${status}d (${result.status} ${result.statusText}).`;
+  await refreshInbox();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 async function sendRuntimeMessage(message) {

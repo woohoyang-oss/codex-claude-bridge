@@ -119,6 +119,20 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, item: updated });
     }
 
+    if (req.method === "POST" && url.pathname === "/inbox/status") {
+      const payload = await readJsonBody(req);
+      const itemId = String(payload.itemId || "");
+      const status = String(payload.status || "");
+      if (!itemId) {
+        return json(res, 400, { ok: false, error: "itemId is required" });
+      }
+      if (status !== "claimed" && status !== "completed") {
+        return json(res, 400, { ok: false, error: "status must be claimed or completed" });
+      }
+      const updated = await markInboxItem(itemId, status);
+      return json(res, 200, { ok: true, item: updated });
+    }
+
     return json(res, 404, { ok: false, error: `Not found: ${req.method} ${url.pathname}` });
   } catch (error) {
     return json(res, 500, {

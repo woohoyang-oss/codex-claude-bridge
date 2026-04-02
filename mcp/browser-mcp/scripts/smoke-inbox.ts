@@ -128,6 +128,27 @@ async function main(): Promise<void> {
     },
   });
 
+  await fetch(`${BRIDGE_URL}/handoff`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      source: "smoke-inbox",
+      note: "Open example.com from the pending handoff queue",
+      activeTab: {
+        title: "Example Domain",
+        url: "https://example.com",
+      },
+    }),
+  });
+
+  const runNextHandoff = await client.callTool({
+    name: "browser_run_next_handoff",
+    arguments: {
+      autoComplete: true,
+      navigateToUrl: true,
+    },
+  });
+
   console.log(
     JSON.stringify(
       {
@@ -136,6 +157,7 @@ async function main(): Promise<void> {
         claimed,
         completed,
         runNextActionRequest,
+        runNextHandoff,
       },
       null,
       2

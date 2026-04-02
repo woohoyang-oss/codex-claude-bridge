@@ -64,10 +64,15 @@ export async function getLatestActionRequest() {
   };
 }
 
-export async function getInboxItems(args: { status?: string; limit?: number } = {}) {
+export async function getInboxItems(args: { status?: string; kind?: string; limit?: number } = {}) {
   const data = await readInboxItems();
   const items: InboxItem[] = Array.isArray(data?.items) ? (data.items as InboxItem[]) : [];
-  const filtered = args.status ? items.filter((item: InboxItem) => item?.status === args.status) : items;
+  const filteredByStatus = args.status
+    ? items.filter((item: InboxItem) => item?.status === args.status)
+    : items;
+  const filtered = args.kind
+    ? filteredByStatus.filter((item: InboxItem) => String(item?.kind || "") === args.kind)
+    : filteredByStatus;
   const limited = typeof args.limit === "number" ? filtered.slice(0, args.limit) : filtered;
   return {
     content: [
@@ -87,10 +92,15 @@ export async function getInboxItems(args: { status?: string; limit?: number } = 
   };
 }
 
-export async function getNextInboxItem(args: { status?: string } = {}) {
+export async function getNextInboxItem(args: { status?: string; kind?: string } = {}) {
   const data = await readInboxItems();
   const items: InboxItem[] = Array.isArray(data?.items) ? (data.items as InboxItem[]) : [];
-  const item = items.find((entry: InboxItem) => !args.status || entry?.status === args.status) || null;
+  const item =
+    items.find(
+      (entry: InboxItem) =>
+        (!args.status || entry?.status === args.status) &&
+        (!args.kind || String(entry?.kind || "") === args.kind)
+    ) || null;
   return {
     content: [
       {

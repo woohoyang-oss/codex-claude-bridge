@@ -17,6 +17,7 @@ import {
   getNextInboxItem,
   getPickedElement,
 } from "./tools/extension-capture.js";
+import { runNextHandoffFromInbox } from "./tools/handoff.js";
 import { markInboxItem } from "./tools/inbox.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
@@ -217,10 +218,11 @@ export async function startServer(): Promise<void> {
       description: "List queued handoff and action-request items created by the Chrome extension bridge.",
       inputSchema: {
         status: z.string().optional().describe("Optional status filter such as pending, claimed, completed."),
+        kind: z.string().optional().describe("Optional kind filter such as handoff or action_request."),
         limit: z.number().int().positive().optional().describe("Maximum number of items to return."),
       },
     },
-    async ({ status, limit }) => getInboxItems({ status, limit })
+    async ({ status, kind, limit }) => getInboxItems({ status, kind, limit })
   );
 
   server.registerTool(
@@ -229,9 +231,10 @@ export async function startServer(): Promise<void> {
       description: "Return the next queued extension bridge inbox item, optionally filtered by status.",
       inputSchema: {
         status: z.string().optional().describe("Optional status filter such as pending, claimed, completed."),
+        kind: z.string().optional().describe("Optional kind filter such as handoff or action_request."),
       },
     },
-    async ({ status }) => getNextInboxItem({ status })
+    async ({ status, kind }) => getNextInboxItem({ status, kind })
   );
 
   server.registerTool(
@@ -317,6 +320,18 @@ export async function startServer(): Promise<void> {
       },
     },
     async ({ autoComplete }) => runNextActionRequestFromInbox(manager, { autoComplete })
+  );
+
+  server.registerTool(
+    "browser_run_next_handoff",
+    {
+      description: "Claim the next pending handoff inbox item, optionally navigate to its active tab URL, and mark it completed.",
+      inputSchema: {
+        autoComplete: z.boolean().optional().describe("Mark the inbox item completed after reading it."),
+        navigateToUrl: z.boolean().optional().describe("Navigate the active browser tab to the handoff activeTab URL if present."),
+      },
+    },
+    async ({ autoComplete, navigateToUrl }) => runNextHandoffFromInbox(manager, { autoComplete, navigateToUrl })
   );
 
   server.registerTool(

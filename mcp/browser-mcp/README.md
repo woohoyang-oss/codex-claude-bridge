@@ -27,6 +27,7 @@ This first version includes:
 - `browser_claim_inbox_item`
 - `browser_complete_inbox_item`
 - `browser_run_next_action_request`
+- `browser_run_next_handoff`
 - `browser_eval`
 - `browser_assert_picked_element_visible`
 - `browser_click_picked_element`

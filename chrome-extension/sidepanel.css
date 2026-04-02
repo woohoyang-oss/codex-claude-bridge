@@ -148,3 +148,53 @@ select {
   font-size: 12px;
   line-height: 1.45;
 }
+
+.inbox-list {
+  display: grid;
+  gap: 10px;
+}
+
+.inbox-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fffaf2;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.inbox-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.inbox-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: var(--accent-soft);
+  color: #6d3000;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.inbox-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.inbox-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inbox-note {
+  font-size: 13px;
+  line-height: 1.4;
+}

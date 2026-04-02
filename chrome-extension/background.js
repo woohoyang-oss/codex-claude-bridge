@@ -43,6 +43,8 @@ async function handleMessage(message, sender) {
       return chrome.storage.local.get(["bridgeUrl", "lastCapture", "lastPickedElement"]);
     case "bridge:get-inbox":
       return getInbox();
+    case "bridge:update-inbox-item":
+      return updateInboxItem(message.itemId, message.status);
     case "bridge:push-last-capture":
       return pushLastCaptureToBridge();
     case "bridge:push-picked-element":
@@ -201,6 +203,27 @@ async function createActionRequest(message) {
 async function getInbox() {
   const { bridgeUrl } = await chrome.storage.local.get(["bridgeUrl"]);
   const response = await fetch(`${bridgeUrl || DEFAULT_BRIDGE_URL}/inbox`);
+  const payload = await response.json();
+  return {
+    ok: response.ok,
+    status: response.status,
+    statusText: response.statusText,
+    payload,
+  };
+}
+
+async function updateInboxItem(itemId, status) {
+  const { bridgeUrl } = await chrome.storage.local.get(["bridgeUrl"]);
+  const response = await fetch(`${bridgeUrl || DEFAULT_BRIDGE_URL}/inbox/status`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      itemId,
+      status,
+    }),
+  });
   const payload = await response.json();
   return {
     ok: response.ok,

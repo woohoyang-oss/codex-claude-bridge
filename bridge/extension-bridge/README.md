@@ -44,6 +44,7 @@ Default data directory:
 - `POST /action-request`
 - `POST /inbox/claim`
 - `POST /inbox/complete`
+- `POST /inbox/status`
 
 ## Stored files
 
