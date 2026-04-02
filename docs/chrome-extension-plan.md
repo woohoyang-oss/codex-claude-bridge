@@ -1,6 +1,6 @@
 # Chrome Extension Plan
 
-This document defines the role of a future Chrome extension in the Codex-Claude bridge project.
+This document defines the role of the Chrome extension in the Codex-Claude bridge project.
 
 ## Current position
 
@@ -12,7 +12,19 @@ The project currently uses a CDP-first architecture:
 
 This is the correct first implementation because it is faster, easier to debug, and already covers the highest-value workflows.
 
-## Why add an extension later
+## Current extension scope
+
+The repository now includes a first Chrome extension scaffold with:
+
+- side panel UI
+- current-tab inspection
+- page-context capture
+- element picker overlay
+- optional push of the last captured payload to a local bridge URL
+
+This gives us the first browser-native UX layer without moving control out of MCP.
+
+## Why keep extending it carefully
 
 A Chrome extension becomes useful when we want a more Claude-like browser experience:
 

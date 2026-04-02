@@ -31,6 +31,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Defines the first browser MCP milestone and tool contracts.
 - `docs/chrome-extension-plan.md`
   Defines how a future Chrome extension should complement the MCP layer instead of replacing it.
+- `chrome-extension/`
+  Unpacked Chrome extension scaffold with side panel, page capture, and element picker.
 - `.mcp.json.example`
   Sample MCP server registration for the local browser MCP.
 
@@ -60,6 +62,22 @@ Current tool surface:
 - `browser_assert_text`
 - `browser_assert_visible`
 - `browser_run_test_flow`
+
+## Chrome extension
+
+The repository now also includes an unpacked Chrome extension at:
+
+```bash
+/Users/wooho/Documents/Playground/chrome-extension
+```
+
+Current extension features:
+
+- side panel
+- active-tab display
+- page-context capture
+- element picker overlay
+- optional push to a local bridge URL
 
 ## Quick start
 

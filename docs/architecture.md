@@ -86,6 +86,21 @@ Deferred approach:
 - optional side panel UX
 - optional native messaging bridge
 
+### 5. Chrome extension UX layer
+
+Purpose:
+
+- expose browser-native handoff and selection UX
+- capture page context from the current tab
+- assist with element targeting before MCP-driven automation
+
+Current scope:
+
+- side panel
+- page capture
+- element picker overlay
+- optional push to a local bridge URL
+
 ## Why CDP first
 
 CDP-first is the fastest path to value:

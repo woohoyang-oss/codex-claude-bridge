@@ -1,0 +1,103 @@
+const DEFAULT_BRIDGE_URL = "http://127.0.0.1:8765";
+
+chrome.runtime.onInstalled.addListener(async () => {
+  await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  const { bridgeUrl } = await chrome.storage.local.get("bridgeUrl");
+  if (!bridgeUrl) {
+    await chrome.storage.local.set({ bridgeUrl: DEFAULT_BRIDGE_URL });
+  }
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  void handleMessage(message, sender)
+    .then((result) => sendResponse(result))
+    .catch((error) =>
+      sendResponse({
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
+  return true;
+});
+
+async function handleMessage(message, sender) {
+  switch (message?.type) {
+    case "bridge:get-active-tab":
+      return getActiveTab();
+    case "bridge:capture-page":
+      return withActiveTab((tabId) =>
+        chrome.tabs.sendMessage(tabId, { type: "bridge:capture-page" })
+      );
+    case "bridge:start-picker":
+      return withActiveTab((tabId) =>
+        chrome.tabs.sendMessage(tabId, { type: "bridge:start-picker" })
+      );
+    case "bridge:stop-picker":
+      return withActiveTab((tabId) =>
+        chrome.tabs.sendMessage(tabId, { type: "bridge:stop-picker" })
+      );
+    case "bridge:save-bridge-url":
+      await chrome.storage.local.set({ bridgeUrl: message.bridgeUrl });
+      return { ok: true, bridgeUrl: message.bridgeUrl };
+    case "bridge:get-settings":
+      return chrome.storage.local.get(["bridgeUrl", "lastCapture", "lastPickedElement"]);
+    case "bridge:push-last-capture":
+      return pushLastCaptureToBridge();
+    case "bridge:picked-element":
+      await chrome.storage.local.set({ lastPickedElement: message.payload });
+      return { ok: true };
+    case "bridge:capture-result":
+      await chrome.storage.local.set({ lastCapture: message.payload });
+      return { ok: true };
+    default:
+      return { ok: false, error: `Unknown message type: ${message?.type ?? "undefined"}` };
+  }
+}
+
+async function getActiveTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return {
+    ok: true,
+    tab: tab
+      ? {
+          id: tab.id,
+          title: tab.title,
+          url: tab.url,
+        }
+      : null,
+  };
+}
+
+async function withActiveTab(callback) {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    return { ok: false, error: "No active tab was found." };
+  }
+  const result = await callback(tab.id);
+  return result ?? { ok: true };
+}
+
+async function pushLastCaptureToBridge() {
+  const { bridgeUrl, lastCapture } = await chrome.storage.local.get(["bridgeUrl", "lastCapture"]);
+  if (!lastCapture) {
+    return { ok: false, error: "No captured page context is available yet." };
+  }
+
+  const response = await fetch(bridgeUrl || DEFAULT_BRIDGE_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      source: "chrome-extension",
+      capturedAt: new Date().toISOString(),
+      page: lastCapture,
+    }),
+  });
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    statusText: response.statusText,
+  };
+}
