@@ -9,6 +9,7 @@ Local bridge service for the Chrome extension.
 - persist the latest browser-native handoff data locally
 - append handoff and action requests into a lightweight local inbox queue
 - let `browser-mcp` read the latest extension context without talking directly to Chrome extension APIs
+- provide a stable inbox source for the Codex inbox relay
 
 ## Run
 

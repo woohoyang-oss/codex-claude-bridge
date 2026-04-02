@@ -29,6 +29,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Starts the local HTTP bridge that receives page captures from the Chrome extension.
 - `run-browser-lab.sh`
   Starts the local deterministic demo page used to validate click/type action requests.
+- `run-codex-inbox-relay.sh`
+  Starts the local relay that exports bridge inbox items into file-based Codex inbox packets.
 - `docs/architecture.md`
   Defines the Codex-to-Claude bridge architecture for this workspace.
 - `docs/browser-mcp-mvp.md`
@@ -39,6 +41,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Unpacked Chrome extension scaffold with side panel, page capture, and element picker.
 - `bridge/extension-bridge/`
   Local bridge service that persists extension capture payloads for browser-mcp.
+- `bridge/codex-inbox-relay/`
+  Local relay that converts bridge inbox items into `.json` and `.md` Codex inbox packets.
 - `demo/browser-lab/`
   Local browser lab page for deterministic action-request testing.
 - `.mcp.json.example`
@@ -99,6 +103,12 @@ Shared bridge data directory:
 
 ```text
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge
+```
+
+File-based Codex inbox packets are exported under:
+
+```text
+/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/open
 ```
 
 ## Quick start
