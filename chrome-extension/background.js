@@ -43,6 +43,8 @@ async function handleMessage(message, sender) {
       return chrome.storage.local.get(["bridgeUrl", "lastCapture", "lastPickedElement"]);
     case "bridge:push-last-capture":
       return pushLastCaptureToBridge();
+    case "bridge:push-picked-element":
+      return pushPickedElementToBridge();
     case "bridge:picked-element":
       await chrome.storage.local.set({ lastPickedElement: message.payload });
       return { ok: true };
@@ -92,6 +94,31 @@ async function pushLastCaptureToBridge() {
       source: "chrome-extension",
       capturedAt: new Date().toISOString(),
       page: lastCapture,
+    }),
+  });
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    statusText: response.statusText,
+  };
+}
+
+async function pushPickedElementToBridge() {
+  const { bridgeUrl, lastPickedElement } = await chrome.storage.local.get(["bridgeUrl", "lastPickedElement"]);
+  if (!lastPickedElement) {
+    return { ok: false, error: "No picked element is available yet." };
+  }
+
+  const response = await fetch(`${bridgeUrl || DEFAULT_BRIDGE_URL}/picked-element`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      source: "chrome-extension",
+      capturedAt: new Date().toISOString(),
+      element: lastPickedElement,
     }),
   });
 

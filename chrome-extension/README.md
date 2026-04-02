@@ -10,6 +10,7 @@ This extension is the first UX layer on top of the CDP-first browser MCP stack.
 - copies captured page JSON for handoff to Codex
 - starts an element picker overlay and stores the last picked selector
 - can push the last captured page payload to a local bridge URL
+- can push the last picked element payload to a local bridge URL
 
 ## What it does not replace
 
@@ -35,3 +36,16 @@ This extension does not replace:
 1. Use the side panel to capture the current page or pick an element
 2. Use `browser-mcp` for control, debugging, and automated verification
 3. Later, connect the extension's local bridge URL to a dedicated local handoff service if tighter integration is needed
+
+## Local bridge
+
+This repository now includes a local bridge service:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+```
+
+Use it together with `browser-mcp` so Codex can read:
+
+- latest extension page capture
+- latest picked element

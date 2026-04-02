@@ -25,6 +25,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Starts the local Claudex runtime with the recommended Codex-backed model.
 - `launch-chrome-debug.sh`
   Starts a local Chrome instance with remote debugging enabled for the browser MCP.
+- `run-extension-bridge.sh`
+  Starts the local HTTP bridge that receives page captures from the Chrome extension.
 - `docs/architecture.md`
   Defines the Codex-to-Claude bridge architecture for this workspace.
 - `docs/browser-mcp-mvp.md`
@@ -33,6 +35,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Defines how a future Chrome extension should complement the MCP layer instead of replacing it.
 - `chrome-extension/`
   Unpacked Chrome extension scaffold with side panel, page capture, and element picker.
+- `bridge/extension-bridge/`
+  Local bridge service that persists extension capture payloads for browser-mcp.
 - `.mcp.json.example`
   Sample MCP server registration for the local browser MCP.
 
@@ -78,6 +82,17 @@ Current extension features:
 - page-context capture
 - element picker overlay
 - optional push to a local bridge URL
+
+Current extension bridge outputs available to browser-mcp:
+
+- latest extension page capture
+- latest picked element
+
+Shared bridge data directory:
+
+```text
+/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge
+```
 
 ## Quick start
 

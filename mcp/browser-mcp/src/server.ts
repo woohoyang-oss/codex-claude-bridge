@@ -9,6 +9,7 @@ import { assertVisible } from "./tools/assert-visible.js";
 import { getConsoleLogs } from "./tools/console-logs.js";
 import { getDomSummary } from "./tools/dom-summary.js";
 import { evalInPage } from "./tools/eval.js";
+import { getExtensionCapture, getPickedElement } from "./tools/extension-capture.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
@@ -157,6 +158,24 @@ export async function startServer(): Promise<void> {
       inputSchema: {},
     },
     async () => getDomSummary(manager)
+  );
+
+  server.registerTool(
+    "browser_get_extension_capture",
+    {
+      description: "Return the latest page capture pushed by the Chrome extension bridge.",
+      inputSchema: {},
+    },
+    async () => getExtensionCapture()
+  );
+
+  server.registerTool(
+    "browser_get_picked_element",
+    {
+      description: "Return the latest element selection pushed by the Chrome extension bridge.",
+      inputSchema: {},
+    },
+    async () => getPickedElement()
   );
 
   server.registerTool(

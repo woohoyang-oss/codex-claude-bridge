@@ -18,6 +18,8 @@ This first version includes:
 - `browser_get_console_logs`
 - `browser_get_network_logs`
 - `browser_get_dom_summary`
+- `browser_get_extension_capture`
+- `browser_get_picked_element`
 - `browser_eval`
 - `browser_assert_text`
 - `browser_assert_visible`
@@ -77,6 +79,20 @@ After Chrome is available on port `9222`:
 cd /Users/wooho/Documents/Playground/mcp/browser-mcp
 npm run build
 npm run smoke
+```
+
+## Extension bridge
+
+If you also want browser-native capture from the Chrome extension:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+```
+
+The bridge stores the latest extension payloads in:
+
+```text
+/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge
 ```
 
 ## Notes

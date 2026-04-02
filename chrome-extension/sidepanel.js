@@ -12,6 +12,7 @@ const elements = {
   stopPicker: document.querySelector("#stop-picker"),
   saveBridgeUrl: document.querySelector("#save-bridge-url"),
   pushBridge: document.querySelector("#push-bridge"),
+  pushPicked: document.querySelector("#push-picked"),
 };
 
 boot();
@@ -36,6 +37,7 @@ function bindEvents() {
     })
   );
   elements.pushBridge.addEventListener("click", () => void pushBridge());
+  elements.pushPicked.addEventListener("click", () => void pushPickedElement());
 }
 
 async function refreshView() {
@@ -83,6 +85,15 @@ async function pushBridge() {
     return;
   }
   elements.bridgeStatus.textContent = `Bridge push succeeded (${result.status} ${result.statusText}).`;
+}
+
+async function pushPickedElement() {
+  const result = await sendRuntimeMessage({ type: "bridge:push-picked-element" });
+  if (!result.ok) {
+    elements.bridgeStatus.textContent = result.error || "Picked-element push failed.";
+    return;
+  }
+  elements.bridgeStatus.textContent = `Picked element push succeeded (${result.status} ${result.statusText}).`;
 }
 
 async function sendRuntimeMessage(message) {

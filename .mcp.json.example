@@ -5,7 +5,8 @@
       "args": ["start"],
       "cwd": "/Users/wooho/Documents/Playground/mcp/browser-mcp",
       "env": {
-        "BROWSER_MCP_CDP_URL": "http://127.0.0.1:9222"
+        "BROWSER_MCP_CDP_URL": "http://127.0.0.1:9222",
+        "CODEX_CLAUDE_BRIDGE_DIR": "/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge"
       }
     }
   }
