@@ -7,6 +7,7 @@ Local bridge service for the Chrome extension.
 - receive captured page context from the extension
 - receive picked-element payloads from the extension
 - persist the latest browser-native handoff data locally
+- append handoff and action requests into a lightweight local inbox queue
 - let `browser-mcp` read the latest extension context without talking directly to Chrome extension APIs
 
 ## Run
@@ -35,11 +36,14 @@ Default data directory:
 - `GET /picked-element`
 - `GET /handoff`
 - `GET /action-request`
+- `GET /inbox`
 - `POST /`
 - `POST /capture`
 - `POST /picked-element`
 - `POST /handoff`
 - `POST /action-request`
+- `POST /inbox/claim`
+- `POST /inbox/complete`
 
 ## Stored files
 
@@ -47,3 +51,4 @@ Default data directory:
 - `latest-picked-element.json`
 - `latest-handoff.json`
 - `latest-action-request.json`
+- `inbox.json`

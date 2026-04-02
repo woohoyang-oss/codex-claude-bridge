@@ -9,11 +9,25 @@ import { assertVisible } from "./tools/assert-visible.js";
 import { getConsoleLogs } from "./tools/console-logs.js";
 import { getDomSummary } from "./tools/dom-summary.js";
 import { evalInPage } from "./tools/eval.js";
-import { getExtensionCapture, getLatestActionRequest, getLatestHandoff, getPickedElement } from "./tools/extension-capture.js";
+import {
+  getExtensionCapture,
+  getInboxItems,
+  getLatestActionRequest,
+  getLatestHandoff,
+  getNextInboxItem,
+  getPickedElement,
+} from "./tools/extension-capture.js";
+import { markInboxItem } from "./tools/inbox.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
-import { assertPickedElementVisible, clickPickedElement, runLatestActionRequest, typeIntoPickedElement } from "./tools/picked-actions.js";
+import {
+  assertPickedElementVisible,
+  clickPickedElement,
+  runLatestActionRequest,
+  runNextActionRequestFromInbox,
+  typeIntoPickedElement,
+} from "./tools/picked-actions.js";
 import { press } from "./tools/press.js";
 import { runTestFlow } from "./tools/run-test-flow.js";
 import { selectTab } from "./tools/select-tab.js";
@@ -198,6 +212,51 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
+    "browser_list_inbox_items",
+    {
+      description: "List queued handoff and action-request items created by the Chrome extension bridge.",
+      inputSchema: {
+        status: z.string().optional().describe("Optional status filter such as pending, claimed, completed."),
+        limit: z.number().int().positive().optional().describe("Maximum number of items to return."),
+      },
+    },
+    async ({ status, limit }) => getInboxItems({ status, limit })
+  );
+
+  server.registerTool(
+    "browser_get_next_inbox_item",
+    {
+      description: "Return the next queued extension bridge inbox item, optionally filtered by status.",
+      inputSchema: {
+        status: z.string().optional().describe("Optional status filter such as pending, claimed, completed."),
+      },
+    },
+    async ({ status }) => getNextInboxItem({ status })
+  );
+
+  server.registerTool(
+    "browser_claim_inbox_item",
+    {
+      description: "Mark an extension bridge inbox item as claimed so another agent does not pick it up twice.",
+      inputSchema: {
+        itemId: z.string().describe("Inbox item id from browser_list_inbox_items or browser_get_next_inbox_item."),
+      },
+    },
+    async ({ itemId }) => markInboxItem({ itemId, status: "claimed" })
+  );
+
+  server.registerTool(
+    "browser_complete_inbox_item",
+    {
+      description: "Mark an extension bridge inbox item as completed after it has been handled.",
+      inputSchema: {
+        itemId: z.string().describe("Inbox item id from browser_list_inbox_items or browser_get_next_inbox_item."),
+      },
+    },
+    async ({ itemId }) => markInboxItem({ itemId, status: "completed" })
+  );
+
+  server.registerTool(
     "browser_eval",
     {
       description: "Run a small JavaScript expression in page context and return its result.",
@@ -247,6 +306,17 @@ export async function startServer(): Promise<void> {
       inputSchema: {},
     },
     async () => runLatestActionRequest(manager)
+  );
+
+  server.registerTool(
+    "browser_run_next_action_request",
+    {
+      description: "Claim the next pending action_request inbox item from the extension bridge, execute it, and mark it completed.",
+      inputSchema: {
+        autoComplete: z.boolean().optional().describe("Mark the inbox item completed after success."),
+      },
+    },
+    async ({ autoComplete }) => runNextActionRequestFromInbox(manager, { autoComplete })
   );
 
   server.registerTool(

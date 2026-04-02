@@ -13,6 +13,7 @@ This extension is the first UX layer on top of the CDP-first browser MCP stack.
 - can push the last picked element payload to a local bridge URL
 - can create a Codex handoff payload containing the active tab, capture, picked element, and an operator note
 - can create a picked-element action request for click, type, or assert-visible
+- can inspect the local inbox queue so recent handoff and action requests are visible in the side panel
 
 ## What it does not replace
 

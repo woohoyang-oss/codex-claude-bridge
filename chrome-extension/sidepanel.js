@@ -6,6 +6,8 @@ const elements = {
   pickedAction: document.querySelector("#picked-action"),
   pickedActionText: document.querySelector("#picked-action-text"),
   pickedActionNote: document.querySelector("#picked-action-note"),
+  inboxSummary: document.querySelector("#inbox-summary"),
+  inboxOutput: document.querySelector("#inbox-output"),
   bridgeUrl: document.querySelector("#bridge-url"),
   handoffNote: document.querySelector("#handoff-note"),
   bridgeStatus: document.querySelector("#bridge-status"),
@@ -15,6 +17,7 @@ const elements = {
   startPicker: document.querySelector("#start-picker"),
   stopPicker: document.querySelector("#stop-picker"),
   saveBridgeUrl: document.querySelector("#save-bridge-url"),
+  refreshInbox: document.querySelector("#refresh-inbox"),
   pushBridge: document.querySelector("#push-bridge"),
   pushPicked: document.querySelector("#push-picked"),
   createHandoff: document.querySelector("#create-handoff"),
@@ -40,8 +43,10 @@ function bindEvents() {
       bridgeUrl: elements.bridgeUrl.value.trim(),
     }).then(() => {
       elements.bridgeStatus.textContent = "Bridge URL saved.";
+      void refreshInbox();
     })
   );
+  elements.refreshInbox.addEventListener("click", () => void refreshInbox());
   elements.pushBridge.addEventListener("click", () => void pushBridge());
   elements.pushPicked.addEventListener("click", () => void pushPickedElement());
   elements.createHandoff.addEventListener("click", () => void createHandoff());
@@ -58,6 +63,7 @@ async function refreshView() {
   elements.pickedOutput.textContent = settings.lastPickedElement
     ? JSON.stringify(settings.lastPickedElement, null, 2)
     : "No element selected.";
+  await refreshInbox();
 }
 
 async function refreshTab() {
@@ -114,6 +120,7 @@ async function createHandoff() {
     return;
   }
   elements.bridgeStatus.textContent = `Codex handoff stored (${result.status} ${result.statusText}).`;
+  await refreshInbox();
 }
 
 async function createActionRequest() {
@@ -128,6 +135,23 @@ async function createActionRequest() {
     return;
   }
   elements.bridgeStatus.textContent = `Action request stored (${result.status} ${result.statusText}).`;
+  await refreshInbox();
+}
+
+async function refreshInbox() {
+  const result = await sendRuntimeMessage({ type: "bridge:get-inbox" });
+  if (!result.ok) {
+    elements.inboxSummary.textContent = result.error || "Inbox fetch failed.";
+    elements.inboxOutput.textContent = "No inbox data loaded.";
+    return;
+  }
+
+  const items = Array.isArray(result.payload?.items) ? result.payload.items : [];
+  const pending = items.filter((item) => item?.status === "pending").length;
+  const claimed = items.filter((item) => item?.status === "claimed").length;
+  const completed = items.filter((item) => item?.status === "completed").length;
+  elements.inboxSummary.textContent = `${items.length} items total, ${pending} pending, ${claimed} claimed, ${completed} completed.`;
+  elements.inboxOutput.textContent = JSON.stringify(items.slice(0, 8), null, 2);
 }
 
 async function sendRuntimeMessage(message) {

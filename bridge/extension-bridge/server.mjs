@@ -11,6 +11,7 @@ const LATEST_CAPTURE_PATH = path.join(DATA_DIR, "latest-capture.json");
 const LATEST_PICKED_PATH = path.join(DATA_DIR, "latest-picked-element.json");
 const LATEST_HANDOFF_PATH = path.join(DATA_DIR, "latest-handoff.json");
 const LATEST_ACTION_REQUEST_PATH = path.join(DATA_DIR, "latest-action-request.json");
+const INBOX_PATH = path.join(DATA_DIR, "inbox.json");
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -34,6 +35,10 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "GET" && url.pathname === "/action-request") {
       return sendFileJson(res, LATEST_ACTION_REQUEST_PATH);
+    }
+
+    if (req.method === "GET" && url.pathname === "/inbox") {
+      return json(res, 200, await readInbox());
     }
 
     if (req.method === "POST" && (url.pathname === "/" || url.pathname === "/capture")) {
@@ -73,35 +78,45 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname === "/handoff") {
       const payload = await readJsonBody(req);
       await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.writeFile(
-        LATEST_HANDOFF_PATH,
-        JSON.stringify(
-          {
-            receivedAt: new Date().toISOString(),
-            payload,
-          },
-          null,
-          2
-        )
-      );
-      return json(res, 200, { ok: true, storedAt: LATEST_HANDOFF_PATH });
+      const record = {
+        receivedAt: new Date().toISOString(),
+        payload,
+      };
+      await fs.writeFile(LATEST_HANDOFF_PATH, JSON.stringify(record, null, 2));
+      const inboxItem = await appendInboxItem("handoff", record);
+      return json(res, 200, { ok: true, storedAt: LATEST_HANDOFF_PATH, inboxItem });
     }
 
     if (req.method === "POST" && url.pathname === "/action-request") {
       const payload = await readJsonBody(req);
       await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.writeFile(
-        LATEST_ACTION_REQUEST_PATH,
-        JSON.stringify(
-          {
-            receivedAt: new Date().toISOString(),
-            payload,
-          },
-          null,
-          2
-        )
-      );
-      return json(res, 200, { ok: true, storedAt: LATEST_ACTION_REQUEST_PATH });
+      const record = {
+        receivedAt: new Date().toISOString(),
+        payload,
+      };
+      await fs.writeFile(LATEST_ACTION_REQUEST_PATH, JSON.stringify(record, null, 2));
+      const inboxItem = await appendInboxItem("action_request", record);
+      return json(res, 200, { ok: true, storedAt: LATEST_ACTION_REQUEST_PATH, inboxItem });
+    }
+
+    if (req.method === "POST" && url.pathname === "/inbox/complete") {
+      const payload = await readJsonBody(req);
+      const itemId = String(payload.itemId || "");
+      if (!itemId) {
+        return json(res, 400, { ok: false, error: "itemId is required" });
+      }
+      const updated = await markInboxItem(itemId, "completed");
+      return json(res, 200, { ok: true, item: updated });
+    }
+
+    if (req.method === "POST" && url.pathname === "/inbox/claim") {
+      const payload = await readJsonBody(req);
+      const itemId = String(payload.itemId || "");
+      if (!itemId) {
+        return json(res, 400, { ok: false, error: "itemId is required" });
+      }
+      const updated = await markInboxItem(itemId, "claimed");
+      return json(res, 200, { ok: true, item: updated });
     }
 
     return json(res, 404, { ok: false, error: `Not found: ${req.method} ${url.pathname}` });
@@ -148,4 +163,65 @@ async function readJsonBody(req) {
   }
   const text = Buffer.concat(chunks).toString("utf8") || "{}";
   return JSON.parse(text);
+}
+
+async function readInbox() {
+  try {
+    const text = await fs.readFile(INBOX_PATH, "utf8");
+    return JSON.parse(text);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return {
+        ok: true,
+        items: [],
+      };
+    }
+    throw error;
+  }
+}
+
+async function appendInboxItem(kind, record) {
+  const inbox = await readInbox();
+  const item = {
+    id: `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    kind,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    record,
+  };
+  const nextInbox = {
+    ok: true,
+    items: [item, ...(inbox.items || [])],
+  };
+  await fs.writeFile(INBOX_PATH, JSON.stringify(nextInbox, null, 2));
+  return item;
+}
+
+async function markInboxItem(itemId, status) {
+  const inbox = await readInbox();
+  const items = (inbox.items || []).map((item) =>
+    item.id === itemId
+      ? {
+          ...item,
+          status,
+          updatedAt: new Date().toISOString(),
+        }
+      : item
+  );
+  const updated = items.find((item) => item.id === itemId);
+  if (!updated) {
+    throw new Error(`Inbox item not found: ${itemId}`);
+  }
+  await fs.writeFile(
+    INBOX_PATH,
+    JSON.stringify(
+      {
+        ok: true,
+        items,
+      },
+      null,
+      2
+    )
+  );
+  return updated;
 }

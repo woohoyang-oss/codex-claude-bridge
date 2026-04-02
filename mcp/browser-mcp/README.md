@@ -22,6 +22,11 @@ This first version includes:
 - `browser_get_picked_element`
 - `browser_get_latest_handoff`
 - `browser_get_latest_action_request`
+- `browser_list_inbox_items`
+- `browser_get_next_inbox_item`
+- `browser_claim_inbox_item`
+- `browser_complete_inbox_item`
+- `browser_run_next_action_request`
 - `browser_eval`
 - `browser_assert_picked_element_visible`
 - `browser_click_picked_element`
@@ -97,6 +102,15 @@ npm run build
 npm run smoke:action-demo
 ```
 
+Inbox demo:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm run build
+npm run smoke:inbox
+```
+
 ## Extension bridge
 
 If you also want browser-native capture from the Chrome extension:
@@ -105,7 +119,7 @@ If you also want browser-native capture from the Chrome extension:
 /Users/wooho/Documents/Playground/run-extension-bridge.sh
 ```
 
-The bridge stores the latest extension payloads in:
+The bridge stores the latest extension payloads and queued inbox items in:
 
 ```text
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge

@@ -93,6 +93,7 @@ Current extension bridge outputs available to browser-mcp:
 - latest picked element
 - latest Codex handoff payload
 - latest picked-element action request
+- queued inbox items for handoff and action-request workflows
 
 Shared bridge data directory:
 

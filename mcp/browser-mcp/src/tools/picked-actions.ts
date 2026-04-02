@@ -1,5 +1,6 @@
 import type { ChromeManager } from "../chrome.js";
-import { readLatestActionRequest, readLatestPickedElement } from "./extension-capture.js";
+import { readInboxItems, readLatestActionRequest, readLatestPickedElement } from "./extension-capture.js";
+import { updateInboxItemStatus } from "./inbox.js";
 
 export async function clickPickedElement(manager: ChromeManager) {
   const selector = await getPickedSelector();
@@ -106,4 +107,62 @@ export async function runLatestActionRequest(manager: ChromeManager) {
     default:
       throw new Error(`Unsupported or missing latest action request: ${String(action)}`);
   }
+}
+
+export async function runNextActionRequestFromInbox(manager: ChromeManager, args: { autoComplete?: boolean } = {}) {
+  const request = await readLatestActionRequest();
+  const inbox = await readInboxItems();
+  const items: Array<Record<string, any>> = Array.isArray(inbox?.items) ? inbox.items : [];
+  const nextPending = items.find(
+    (item: Record<string, any>) =>
+      item?.status === "pending" && item?.kind === "action_request" && item?.record?.payload?.action
+  );
+
+  if (!nextPending?.id) {
+    throw new Error("No pending action_request inbox item is available.");
+  }
+
+  await updateInboxItemStatus({ itemId: nextPending.id, status: "claimed" });
+  const payload = nextPending.record;
+  const action = payload?.payload?.action;
+
+  let result;
+  switch (action) {
+    case "assert_visible":
+      result = await assertPickedElementVisible(manager, { timeoutMs: 5000 });
+      break;
+    case "click":
+      result = await clickPickedElement(manager);
+      break;
+    case "type":
+      result = await typeIntoPickedElement(manager, {
+        text: payload?.payload?.text || "",
+        clearFirst: true,
+      });
+      break;
+    default:
+      throw new Error(`Unsupported action_request inbox action: ${String(action)}`);
+  }
+
+  if (args.autoComplete ?? true) {
+    await updateInboxItemStatus({ itemId: nextPending.id, status: "completed" });
+  }
+
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(
+          {
+            inboxItemId: nextPending.id,
+            handledAction: action,
+            latestActionRequestPreview: request?.payload?.action ?? null,
+            result: JSON.parse(String(result.content[0]?.text || "{}")),
+          },
+          null,
+          2
+        ),
+      },
+    ],
+  };
 }
