@@ -34,13 +34,16 @@ Default data directory:
 - `GET /latest`
 - `GET /picked-element`
 - `GET /handoff`
+- `GET /action-request`
 - `POST /`
 - `POST /capture`
 - `POST /picked-element`
 - `POST /handoff`
+- `POST /action-request`
 
 ## Stored files
 
 - `latest-capture.json`
 - `latest-picked-element.json`
 - `latest-handoff.json`
+- `latest-action-request.json`

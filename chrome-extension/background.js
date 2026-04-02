@@ -47,6 +47,8 @@ async function handleMessage(message, sender) {
       return pushPickedElementToBridge();
     case "bridge:create-handoff":
       return createHandoff(message.note);
+    case "bridge:create-action-request":
+      return createActionRequest(message);
     case "bridge:picked-element":
       await chrome.storage.local.set({ lastPickedElement: message.payload });
       return { ok: true };
@@ -147,6 +149,38 @@ async function createHandoff(note) {
   };
 
   const response = await fetch(`${bridgeUrl || DEFAULT_BRIDGE_URL}/handoff`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    statusText: response.statusText,
+    payload,
+  };
+}
+
+async function createActionRequest(message) {
+  const [{ title, url }, { bridgeUrl, lastPickedElement }] = await Promise.all([
+    getActiveTab().then((result) => result.tab || {}),
+    chrome.storage.local.get(["bridgeUrl", "lastPickedElement"]),
+  ]);
+
+  const payload = {
+    source: "chrome-extension",
+    createdAt: new Date().toISOString(),
+    activeTab: { title, url },
+    action: message.action,
+    text: message.text || "",
+    note: message.note || "",
+    pickedElement: lastPickedElement || null,
+  };
+
+  const response = await fetch(`${bridgeUrl || DEFAULT_BRIDGE_URL}/action-request`, {
     method: "POST",
     headers: {
       "content-type": "application/json",

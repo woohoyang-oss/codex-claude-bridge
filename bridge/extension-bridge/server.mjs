@@ -10,6 +10,7 @@ const DATA_DIR =
 const LATEST_CAPTURE_PATH = path.join(DATA_DIR, "latest-capture.json");
 const LATEST_PICKED_PATH = path.join(DATA_DIR, "latest-picked-element.json");
 const LATEST_HANDOFF_PATH = path.join(DATA_DIR, "latest-handoff.json");
+const LATEST_ACTION_REQUEST_PATH = path.join(DATA_DIR, "latest-action-request.json");
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -29,6 +30,10 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "GET" && url.pathname === "/handoff") {
       return sendFileJson(res, LATEST_HANDOFF_PATH);
+    }
+
+    if (req.method === "GET" && url.pathname === "/action-request") {
+      return sendFileJson(res, LATEST_ACTION_REQUEST_PATH);
     }
 
     if (req.method === "POST" && (url.pathname === "/" || url.pathname === "/capture")) {
@@ -80,6 +85,23 @@ const server = http.createServer(async (req, res) => {
         )
       );
       return json(res, 200, { ok: true, storedAt: LATEST_HANDOFF_PATH });
+    }
+
+    if (req.method === "POST" && url.pathname === "/action-request") {
+      const payload = await readJsonBody(req);
+      await fs.mkdir(DATA_DIR, { recursive: true });
+      await fs.writeFile(
+        LATEST_ACTION_REQUEST_PATH,
+        JSON.stringify(
+          {
+            receivedAt: new Date().toISOString(),
+            payload,
+          },
+          null,
+          2
+        )
+      );
+      return json(res, 200, { ok: true, storedAt: LATEST_ACTION_REQUEST_PATH });
     }
 
     return json(res, 404, { ok: false, error: `Not found: ${req.method} ${url.pathname}` });

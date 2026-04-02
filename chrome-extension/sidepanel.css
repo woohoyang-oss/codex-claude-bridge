@@ -80,7 +80,8 @@ p {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -124,6 +125,14 @@ textarea {
   background: white;
   padding: 10px 12px;
   resize: vertical;
+}
+
+select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  padding: 10px 12px;
 }
 
 .output {

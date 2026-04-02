@@ -21,10 +21,12 @@ This first version includes:
 - `browser_get_extension_capture`
 - `browser_get_picked_element`
 - `browser_get_latest_handoff`
+- `browser_get_latest_action_request`
 - `browser_eval`
 - `browser_assert_picked_element_visible`
 - `browser_click_picked_element`
 - `browser_type_picked_element`
+- `browser_run_latest_action_request`
 - `browser_assert_text`
 - `browser_assert_visible`
 - `browser_run_test_flow`

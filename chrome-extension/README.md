@@ -12,6 +12,7 @@ This extension is the first UX layer on top of the CDP-first browser MCP stack.
 - can push the last captured page payload to a local bridge URL
 - can push the last picked element payload to a local bridge URL
 - can create a Codex handoff payload containing the active tab, capture, picked element, and an operator note
+- can create a picked-element action request for click, type, or assert-visible
 
 ## What it does not replace
 
@@ -51,3 +52,4 @@ Use it together with `browser-mcp` so Codex can read:
 - latest extension page capture
 - latest picked element
 - latest Codex handoff payload
+- latest picked-element action request

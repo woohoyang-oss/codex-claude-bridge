@@ -119,11 +119,19 @@ async function main(): Promise<void> {
     name: "browser_get_latest_handoff",
     arguments: {},
   });
+  const latestActionRequest = await client.callTool({
+    name: "browser_get_latest_action_request",
+    arguments: {},
+  });
   const pickedVisible = await client.callTool({
     name: "browser_assert_picked_element_visible",
     arguments: {
       timeoutMs: 5000,
     },
+  });
+  const runLatestActionRequest = await client.callTool({
+    name: "browser_run_latest_action_request",
+    arguments: {},
   });
 
   console.log(
@@ -144,7 +152,9 @@ async function main(): Promise<void> {
         extensionCapture,
         pickedElement,
         latestHandoff,
+        latestActionRequest,
         pickedVisible,
+        runLatestActionRequest,
       },
       null,
       2

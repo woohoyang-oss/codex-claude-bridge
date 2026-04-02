@@ -3,6 +3,9 @@ const elements = {
   tabUrl: document.querySelector("#tab-url"),
   captureOutput: document.querySelector("#capture-output"),
   pickedOutput: document.querySelector("#picked-output"),
+  pickedAction: document.querySelector("#picked-action"),
+  pickedActionText: document.querySelector("#picked-action-text"),
+  pickedActionNote: document.querySelector("#picked-action-note"),
   bridgeUrl: document.querySelector("#bridge-url"),
   handoffNote: document.querySelector("#handoff-note"),
   bridgeStatus: document.querySelector("#bridge-status"),
@@ -15,6 +18,7 @@ const elements = {
   pushBridge: document.querySelector("#push-bridge"),
   pushPicked: document.querySelector("#push-picked"),
   createHandoff: document.querySelector("#create-handoff"),
+  createActionRequest: document.querySelector("#create-action-request"),
 };
 
 boot();
@@ -41,6 +45,7 @@ function bindEvents() {
   elements.pushBridge.addEventListener("click", () => void pushBridge());
   elements.pushPicked.addEventListener("click", () => void pushPickedElement());
   elements.createHandoff.addEventListener("click", () => void createHandoff());
+  elements.createActionRequest.addEventListener("click", () => void createActionRequest());
 }
 
 async function refreshView() {
@@ -109,6 +114,20 @@ async function createHandoff() {
     return;
   }
   elements.bridgeStatus.textContent = `Codex handoff stored (${result.status} ${result.statusText}).`;
+}
+
+async function createActionRequest() {
+  const result = await sendRuntimeMessage({
+    type: "bridge:create-action-request",
+    action: elements.pickedAction.value,
+    text: elements.pickedActionText.value.trim(),
+    note: elements.pickedActionNote.value.trim(),
+  });
+  if (!result.ok) {
+    elements.bridgeStatus.textContent = result.error || "Action request creation failed.";
+    return;
+  }
+  elements.bridgeStatus.textContent = `Action request stored (${result.status} ${result.statusText}).`;
 }
 
 async function sendRuntimeMessage(message) {

@@ -66,6 +66,25 @@
           <h2>Picked Element</h2>
         </div>
         <pre id="picked-output" class="output">No element selected.</pre>
+        <label class="field">
+          <span>Picked element action</span>
+          <select id="picked-action">
+            <option value="assert_visible">Assert Visible</option>
+            <option value="click">Click</option>
+            <option value="type">Type</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Action text</span>
+          <input id="picked-action-text" type="text" placeholder="Only used for type action" />
+        </label>
+        <label class="field">
+          <span>Action note</span>
+          <textarea id="picked-action-note" rows="3" placeholder="Optional note for Codex about this picked-element action"></textarea>
+        </label>
+        <div class="button-row">
+          <button id="create-action-request">Create Action Request</button>
+        </div>
       </section>
     </main>
 

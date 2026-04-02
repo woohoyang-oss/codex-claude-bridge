@@ -9,11 +9,11 @@ import { assertVisible } from "./tools/assert-visible.js";
 import { getConsoleLogs } from "./tools/console-logs.js";
 import { getDomSummary } from "./tools/dom-summary.js";
 import { evalInPage } from "./tools/eval.js";
-import { getExtensionCapture, getLatestHandoff, getPickedElement } from "./tools/extension-capture.js";
+import { getExtensionCapture, getLatestActionRequest, getLatestHandoff, getPickedElement } from "./tools/extension-capture.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
-import { assertPickedElementVisible, clickPickedElement, typeIntoPickedElement } from "./tools/picked-actions.js";
+import { assertPickedElementVisible, clickPickedElement, runLatestActionRequest, typeIntoPickedElement } from "./tools/picked-actions.js";
 import { press } from "./tools/press.js";
 import { runTestFlow } from "./tools/run-test-flow.js";
 import { selectTab } from "./tools/select-tab.js";
@@ -189,6 +189,15 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
+    "browser_get_latest_action_request",
+    {
+      description: "Return the latest picked-element action request stored by the extension bridge.",
+      inputSchema: {},
+    },
+    async () => getLatestActionRequest()
+  );
+
+  server.registerTool(
     "browser_eval",
     {
       description: "Run a small JavaScript expression in page context and return its result.",
@@ -229,6 +238,15 @@ export async function startServer(): Promise<void> {
       },
     },
     async ({ text, clearFirst }) => typeIntoPickedElement(manager, { text, clearFirst })
+  );
+
+  server.registerTool(
+    "browser_run_latest_action_request",
+    {
+      description: "Execute the latest picked-element action request from the extension bridge.",
+      inputSchema: {},
+    },
+    async () => runLatestActionRequest(manager)
   );
 
   server.registerTool(

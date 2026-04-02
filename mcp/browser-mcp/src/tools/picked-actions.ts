@@ -1,5 +1,5 @@
 import type { ChromeManager } from "../chrome.js";
-import { readLatestPickedElement } from "./extension-capture.js";
+import { readLatestActionRequest, readLatestPickedElement } from "./extension-capture.js";
 
 export async function clickPickedElement(manager: ChromeManager) {
   const selector = await getPickedSelector();
@@ -87,4 +87,23 @@ export async function getPickedSelector() {
     throw new Error("No picked-element selector is available from the extension bridge.");
   }
   return selector;
+}
+
+export async function runLatestActionRequest(manager: ChromeManager) {
+  const request = await readLatestActionRequest();
+  const action = request?.payload?.action;
+
+  switch (action) {
+    case "assert_visible":
+      return assertPickedElementVisible(manager, { timeoutMs: 5000 });
+    case "click":
+      return clickPickedElement(manager);
+    case "type":
+      return typeIntoPickedElement(manager, {
+        text: request?.payload?.text || "",
+        clearFirst: true,
+      });
+    default:
+      throw new Error(`Unsupported or missing latest action request: ${String(action)}`);
+  }
 }
