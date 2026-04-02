@@ -87,6 +87,16 @@ npm run build
 npm run smoke
 ```
 
+Action demo:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+/Users/wooho/Documents/Playground/run-browser-lab.sh
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm run build
+npm run smoke:action-demo
+```
+
 ## Extension bridge
 
 If you also want browser-native capture from the Chrome extension:

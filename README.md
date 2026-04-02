@@ -27,6 +27,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Starts a local Chrome instance with remote debugging enabled for the browser MCP.
 - `run-extension-bridge.sh`
   Starts the local HTTP bridge that receives page captures from the Chrome extension.
+- `run-browser-lab.sh`
+  Starts the local deterministic demo page used to validate click/type action requests.
 - `docs/architecture.md`
   Defines the Codex-to-Claude bridge architecture for this workspace.
 - `docs/browser-mcp-mvp.md`
@@ -37,6 +39,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Unpacked Chrome extension scaffold with side panel, page capture, and element picker.
 - `bridge/extension-bridge/`
   Local bridge service that persists extension capture payloads for browser-mcp.
+- `demo/browser-lab/`
+  Local browser lab page for deterministic action-request testing.
 - `.mcp.json.example`
   Sample MCP server registration for the local browser MCP.
 
