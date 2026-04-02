@@ -18,7 +18,7 @@ import {
   getPickedElement,
 } from "./tools/extension-capture.js";
 import { runNextHandoffFromInbox } from "./tools/handoff.js";
-import { markInboxItem } from "./tools/inbox.js";
+import { markInboxItem, retryInboxItem } from "./tools/inbox.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
@@ -265,9 +265,21 @@ export async function startServer(): Promise<void> {
       description: "Mark an extension bridge inbox item as failed after an execution error.",
       inputSchema: {
         itemId: z.string().describe("Inbox item id from browser_list_inbox_items or browser_get_next_inbox_item."),
+        error: z.string().optional().describe("Optional failure message to persist on the inbox item."),
       },
     },
-    async ({ itemId }) => markInboxItem({ itemId, status: "failed" })
+    async ({ itemId, error }) => markInboxItem({ itemId, status: "failed", error })
+  );
+
+  server.registerTool(
+    "browser_retry_inbox_item",
+    {
+      description: "Reset a failed inbox item back to pending so the worker can try it again.",
+      inputSchema: {
+        itemId: z.string().describe("Inbox item id from browser_list_inbox_items or browser_get_next_inbox_item."),
+      },
+    },
+    async ({ itemId }) => retryInboxItem({ itemId })
   );
 
   server.registerTool(

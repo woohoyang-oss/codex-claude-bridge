@@ -12,7 +12,8 @@
     "smoke": "tsx scripts/smoke.ts",
     "smoke:action-demo": "tsx scripts/smoke-action-demo.ts",
     "smoke:inbox": "tsx scripts/smoke-inbox.ts",
-    "smoke:worker": "tsx scripts/smoke-worker.ts"
+    "smoke:worker": "tsx scripts/smoke-worker.ts",
+    "smoke:retry": "tsx scripts/smoke-retry.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

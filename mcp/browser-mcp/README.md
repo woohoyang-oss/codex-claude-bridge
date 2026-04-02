@@ -27,6 +27,7 @@ This first version includes:
 - `browser_claim_inbox_item`
 - `browser_complete_inbox_item`
 - `browser_fail_inbox_item`
+- `browser_retry_inbox_item`
 - `browser_run_next_action_request`
 - `browser_run_next_handoff`
 - `browser_eval`
@@ -127,6 +128,15 @@ Worker demo:
 cd /Users/wooho/Documents/Playground/mcp/browser-mcp
 npm run build
 npm run smoke:worker
+```
+
+Retry demo:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm run build
+npm run smoke:retry
 ```
 
 ## Extension bridge

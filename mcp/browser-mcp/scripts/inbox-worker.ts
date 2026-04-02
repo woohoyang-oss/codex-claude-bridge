@@ -75,6 +75,9 @@ async function runCycle() {
           autoComplete: true,
         },
       });
+      if (result.isError) {
+        throw new Error(extractText(result) || "Action request tool returned an error.");
+      }
       handled.push({
         kind: "action_request",
         id: nextAction.id,
@@ -82,17 +85,19 @@ async function runCycle() {
         result: extractText(result),
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       await client.callTool({
         name: "browser_fail_inbox_item",
         arguments: {
           itemId: nextAction.id,
+          error: message,
         },
       });
       handled.push({
         kind: "action_request",
         id: nextAction.id,
         status: "failed",
-        error: error instanceof Error ? error.message : String(error),
+        error: message,
       });
     }
   }
@@ -110,6 +115,9 @@ async function runCycle() {
           navigateToUrl: true,
         },
       });
+      if (result.isError) {
+        throw new Error(extractText(result) || "Handoff tool returned an error.");
+      }
       handled.push({
         kind: "handoff",
         id: nextHandoff.id,
@@ -117,17 +125,19 @@ async function runCycle() {
         result: extractText(result),
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       await client.callTool({
         name: "browser_fail_inbox_item",
         arguments: {
           itemId: nextHandoff.id,
+          error: message,
         },
       });
       handled.push({
         kind: "handoff",
         id: nextHandoff.id,
         status: "failed",
-        error: error instanceof Error ? error.message : String(error),
+        error: message,
       });
     }
   }

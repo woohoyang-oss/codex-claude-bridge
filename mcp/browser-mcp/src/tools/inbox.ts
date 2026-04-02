@@ -11,7 +11,11 @@ type InboxItem = {
   [key: string]: unknown;
 };
 
-export async function markInboxItem(args: { itemId: string; status: "claimed" | "completed" | "failed" }) {
+export async function markInboxItem(args: {
+  itemId: string;
+  status: "claimed" | "completed" | "failed" | "pending";
+  error?: string;
+}) {
   const updated = await updateInboxItemStatus(args);
   return {
     content: [
@@ -30,7 +34,11 @@ export async function markInboxItem(args: { itemId: string; status: "claimed" | 
   };
 }
 
-export async function updateInboxItemStatus(args: { itemId: string; status: "claimed" | "completed" | "failed" }) {
+export async function updateInboxItemStatus(args: {
+  itemId: string;
+  status: "claimed" | "completed" | "failed" | "pending";
+  error?: string;
+}) {
   const inbox = await readInbox();
   const items: InboxItem[] = Array.isArray(inbox?.items) ? (inbox.items as InboxItem[]) : [];
   const nextItems = items.map((item: InboxItem) =>
@@ -39,6 +47,17 @@ export async function updateInboxItemStatus(args: { itemId: string; status: "cla
           ...item,
           status: args.status,
           updatedAt: new Date().toISOString(),
+          ...(args.status === "failed"
+            ? {
+                lastError: args.error || "Execution failed.",
+              }
+            : {}),
+          ...(args.status === "pending"
+            ? {
+                retryCount: Number(item?.retryCount || 0) + 1,
+                lastError: undefined,
+              }
+            : {}),
         }
       : item
   );
@@ -60,6 +79,28 @@ export async function updateInboxItemStatus(args: { itemId: string; status: "cla
     )
   );
   return updated;
+}
+
+export async function retryInboxItem(args: { itemId: string }) {
+  const updated = await updateInboxItemStatus({
+    itemId: args.itemId,
+    status: "pending",
+  });
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(
+          {
+            ok: true,
+            item: updated,
+          },
+          null,
+          2
+        ),
+      },
+    ],
+  };
 }
 
 async function readInbox() {

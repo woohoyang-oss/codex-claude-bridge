@@ -126,10 +126,10 @@ const server = http.createServer(async (req, res) => {
       if (!itemId) {
         return json(res, 400, { ok: false, error: "itemId is required" });
       }
-      if (status !== "claimed" && status !== "completed" && status !== "failed") {
-        return json(res, 400, { ok: false, error: "status must be claimed, completed, or failed" });
+      if (status !== "claimed" && status !== "completed" && status !== "failed" && status !== "pending") {
+        return json(res, 400, { ok: false, error: "status must be claimed, completed, failed, or pending" });
       }
-      const updated = await markInboxItem(itemId, status);
+      const updated = await markInboxItem(itemId, status, payload.error);
       return json(res, 200, { ok: true, item: updated });
     }
 
@@ -211,7 +211,7 @@ async function appendInboxItem(kind, record) {
   return item;
 }
 
-async function markInboxItem(itemId, status) {
+async function markInboxItem(itemId, status, errorMessage) {
   const inbox = await readInbox();
   const items = (inbox.items || []).map((item) =>
     item.id === itemId
@@ -219,6 +219,17 @@ async function markInboxItem(itemId, status) {
           ...item,
           status,
           updatedAt: new Date().toISOString(),
+          ...(status === "failed"
+            ? {
+                lastError: errorMessage || "Execution failed.",
+              }
+            : {}),
+          ...(status === "pending"
+            ? {
+                retryCount: Number(item.retryCount || 0) + 1,
+                lastError: undefined,
+              }
+            : {}),
         }
       : item
   );

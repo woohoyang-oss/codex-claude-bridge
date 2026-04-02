@@ -213,6 +213,8 @@ Implemented smoke flows:
   Inbox queue flow including claim, complete, action execution, and handoff execution
 - `npm run smoke:worker`
   Worker flow that drains pending action requests and handoffs from the queue
+- `npm run smoke:retry`
+  Failed-item retry flow for browser inbox work
 - `node /Users/wooho/Documents/Playground/scripts/smoke-codex-inbox-relay.mjs`
   Codex inbox packet export and archive flow
 
