@@ -80,6 +80,30 @@ async function main(): Promise<void> {
       timeoutMs: 5000,
     },
   });
+  const evalResult = await client.callTool({
+    name: "browser_eval",
+    arguments: {
+      expression: "document.title",
+    },
+  });
+  const scrollResult = await client.callTool({
+    name: "browser_scroll",
+    arguments: {
+      y: 250,
+    },
+  });
+  const flowResult = await client.callTool({
+    name: "browser_run_test_flow",
+    arguments: {
+      steps: [
+        { action: "navigate", url: "https://example.com" },
+        { action: "wait_for", text: "Example Domain", timeoutMs: 10000 },
+        { action: "assert_text", text: "Example Domain", timeoutMs: 5000 },
+        { action: "assert_visible", selector: "h1", timeoutMs: 5000 },
+        { action: "eval", expression: "document.title" }
+      ],
+    },
+  });
 
   console.log(
     JSON.stringify(
@@ -93,6 +117,9 @@ async function main(): Promise<void> {
         networkLogs,
         assertText,
         assertVisible,
+        evalResult,
+        scrollResult,
+        flowResult,
       },
       null,
       2

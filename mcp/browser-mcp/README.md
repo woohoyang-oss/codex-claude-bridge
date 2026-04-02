@@ -12,12 +12,16 @@ This first version includes:
 - `browser_wait_for`
 - `browser_click`
 - `browser_type`
+- `browser_press`
+- `browser_scroll`
 - `browser_screenshot`
 - `browser_get_console_logs`
 - `browser_get_network_logs`
 - `browser_get_dom_summary`
+- `browser_eval`
 - `browser_assert_text`
 - `browser_assert_visible`
+- `browser_run_test_flow`
 
 ## Requirements
 

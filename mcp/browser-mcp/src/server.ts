@@ -8,11 +8,15 @@ import { assertText } from "./tools/assert-text.js";
 import { assertVisible } from "./tools/assert-visible.js";
 import { getConsoleLogs } from "./tools/console-logs.js";
 import { getDomSummary } from "./tools/dom-summary.js";
+import { evalInPage } from "./tools/eval.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
+import { press } from "./tools/press.js";
+import { runTestFlow } from "./tools/run-test-flow.js";
 import { selectTab } from "./tools/select-tab.js";
 import { screenshot } from "./tools/screenshot.js";
+import { scroll } from "./tools/scroll.js";
 import { typeText } from "./tools/type.js";
 import { waitFor } from "./tools/wait-for.js";
 
@@ -94,6 +98,29 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
+    "browser_press",
+    {
+      description: "Send a keyboard key to the active page.",
+      inputSchema: {
+        key: z.string().describe("Keyboard key such as Enter, Tab, Escape, ArrowDown."),
+      },
+    },
+    async ({ key }) => press(manager, { key })
+  );
+
+  server.registerTool(
+    "browser_scroll",
+    {
+      description: "Scroll the active page by a relative x/y offset.",
+      inputSchema: {
+        x: z.number().optional().describe("Horizontal scroll delta."),
+        y: z.number().optional().describe("Vertical scroll delta."),
+      },
+    },
+    async ({ x, y }) => scroll(manager, { x, y })
+  );
+
+  server.registerTool(
     "browser_screenshot",
     {
       description: "Capture a screenshot of the active page.",
@@ -133,6 +160,17 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
+    "browser_eval",
+    {
+      description: "Run a small JavaScript expression in page context and return its result.",
+      inputSchema: {
+        expression: z.string().describe("JavaScript expression evaluated in the page context."),
+      },
+    },
+    async ({ expression }) => evalInPage(manager, { expression })
+  );
+
+  server.registerTool(
     "browser_assert_text",
     {
       description: "Assert that visible text appears on the active page.",
@@ -154,6 +192,19 @@ export async function startServer(): Promise<void> {
       },
     },
     async ({ selector, timeoutMs }) => assertVisible(manager, { selector, timeoutMs })
+  );
+
+  server.registerTool(
+    "browser_run_test_flow",
+    {
+      description: "Run a structured browser test flow made of navigation, interaction, inspection, and assertions.",
+      inputSchema: {
+        steps: z
+          .array(z.record(z.any()))
+          .describe("Ordered array of flow steps such as navigate, click, type, wait_for, assert_text, screenshot."),
+      },
+    },
+    async ({ steps }) => runTestFlow(manager, sessions, { steps: steps as never[] })
   );
 
   const transport = new StdioServerTransport();

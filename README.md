@@ -43,9 +43,21 @@ The first executable implementation lives under:
 Current tool surface:
 
 - `browser_list_tabs`
+- `browser_select_tab`
 - `browser_navigate`
+- `browser_wait_for`
+- `browser_click`
+- `browser_type`
+- `browser_press`
+- `browser_scroll`
 - `browser_screenshot`
 - `browser_get_console_logs`
+- `browser_get_network_logs`
+- `browser_get_dom_summary`
+- `browser_eval`
+- `browser_assert_text`
+- `browser_assert_visible`
+- `browser_run_test_flow`
 
 ## Quick start
 
