@@ -1,0 +1,108 @@
+import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+
+async function main(): Promise<void> {
+  const transport = new StdioClientTransport({
+    command: "node",
+    args: [path.join(process.cwd(), "dist", "index.js")],
+    cwd: process.cwd(),
+    stderr: "pipe",
+    env: {
+      BROWSER_MCP_CDP_URL: process.env.BROWSER_MCP_CDP_URL ?? "http://127.0.0.1:9222",
+    },
+  });
+
+  if (transport.stderr) {
+    transport.stderr.on("data", (chunk) => {
+      process.stderr.write(chunk);
+    });
+  }
+
+  const client = new Client(
+    {
+      name: "browser-mcp-smoke",
+      version: "0.1.0",
+    },
+    {
+      capabilities: {},
+    }
+  );
+
+  await client.connect(transport);
+
+  const screenshotPath = path.join("/tmp", `browser-mcp-smoke-${Date.now()}.png`);
+
+  const listTools = await client.listTools();
+  const navigate = await client.callTool({
+    name: "browser_navigate",
+    arguments: {
+      url: "https://example.com",
+    },
+  });
+  const waitFor = await client.callTool({
+    name: "browser_wait_for",
+    arguments: {
+      text: "Example Domain",
+      timeoutMs: 10000,
+    },
+  });
+  const dom = await client.callTool({
+    name: "browser_get_dom_summary",
+    arguments: {},
+  });
+  const screenshot = await client.callTool({
+    name: "browser_screenshot",
+    arguments: {
+      outputPath: screenshotPath,
+      fullPage: true,
+    },
+  });
+  const consoleLogs = await client.callTool({
+    name: "browser_get_console_logs",
+    arguments: {},
+  });
+  const networkLogs = await client.callTool({
+    name: "browser_get_network_logs",
+    arguments: {},
+  });
+  const assertText = await client.callTool({
+    name: "browser_assert_text",
+    arguments: {
+      text: "Example Domain",
+      timeoutMs: 5000,
+    },
+  });
+  const assertVisible = await client.callTool({
+    name: "browser_assert_visible",
+    arguments: {
+      selector: "h1",
+      timeoutMs: 5000,
+    },
+  });
+
+  console.log(
+    JSON.stringify(
+      {
+        tools: listTools.tools.map((tool) => tool.name),
+        navigate,
+        waitFor,
+        dom,
+        screenshot,
+        consoleLogs,
+        networkLogs,
+        assertText,
+        assertVisible,
+      },
+      null,
+      2
+    )
+  );
+
+  await client.close();
+}
+
+main().catch((error) => {
+  console.error("smoke failed:", error);
+  process.exit(1);
+});

@@ -1,4 +1,5 @@
 claudex/
 node_modules/
 dist/
-
+mcp/**/node_modules/
+mcp/**/dist/
