@@ -132,3 +132,10 @@ Implement browser verification and reusable test flows.
 
 Add optional extension-based UX only if CDP-only flow proves insufficient.
 
+## Chrome extension stance
+
+The Chrome extension is a later UX layer, not the core control plane.
+
+- core browser control stays in `browser-mcp`
+- the extension is meant for side panel UX, element picking, page-to-agent handoff, and approval affordances
+- the extension should enhance the CDP workflow, not replace it

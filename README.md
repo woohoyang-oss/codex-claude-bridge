@@ -29,6 +29,8 @@ When this repository is opened in Codex, it should quickly establish the intende
   Defines the Codex-to-Claude bridge architecture for this workspace.
 - `docs/browser-mcp-mvp.md`
   Defines the first browser MCP milestone and tool contracts.
+- `docs/chrome-extension-plan.md`
+  Defines how a future Chrome extension should complement the MCP layer instead of replacing it.
 - `.mcp.json.example`
   Sample MCP server registration for the local browser MCP.
 
