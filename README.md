@@ -2,6 +2,26 @@
 
 Make Codex feel closer to a Claude-style browser-connected coding workflow.
 
+## Use Codex Desktop Like Claude
+
+If your goal is "Codex Desktop, but operated more like Claude," this repo now includes the minimum starter set for that mode:
+
+- workspace rules in `AGENTS.md`
+- an opinionated workflow note in `CLAUDEX_MODE.md`
+- a reusable starter template in `templates/codex-desktop-claude-starter/`
+- local skill examples in `skills/`
+- browser tooling through `.mcp.json`, `browser-mcp`, the Chrome extension, and the local bridge stack
+
+To bootstrap another project with the same feel:
+
+```bash
+/Users/wooho/Documents/Playground/setup-codex-claude-workspace.sh /path/to/your/project
+```
+
+The starter guide lives here:
+
+- `docs/codex-desktop-claude-mode.md`
+
 ## Status
 
 Current state: `working browser MVP`
@@ -287,12 +307,16 @@ Bootstrap and operating files:
 - `run-claudex.sh`
 - `.mcp.json`
 - `.mcp.json.example`
+- `skills/`
+- `templates/codex-desktop-claude-starter/`
+- `setup-codex-claude-workspace.sh`
 
 Planning and architecture:
 
 - `docs/architecture.md`
 - `docs/browser-mcp-mvp.md`
 - `docs/chrome-extension-plan.md`
+- `docs/codex-desktop-claude-mode.md`
 
 ## Current Goal
 
