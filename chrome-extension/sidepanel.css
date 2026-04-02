@@ -79,7 +79,8 @@ p {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -114,6 +115,15 @@ input {
   border-radius: 10px;
   background: white;
   padding: 10px 12px;
+}
+
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  padding: 10px 12px;
+  resize: vertical;
 }
 
 .output {

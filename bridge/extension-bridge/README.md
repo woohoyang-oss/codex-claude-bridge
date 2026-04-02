@@ -33,11 +33,14 @@ Default data directory:
 - `GET /health`
 - `GET /latest`
 - `GET /picked-element`
+- `GET /handoff`
 - `POST /`
 - `POST /capture`
 - `POST /picked-element`
+- `POST /handoff`
 
 ## Stored files
 
 - `latest-capture.json`
 - `latest-picked-element.json`
+- `latest-handoff.json`

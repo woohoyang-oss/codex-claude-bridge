@@ -6,9 +6,10 @@ const DATA_DIR =
   "/Users/wooho/Documents/Playground/.runtime/codex-claude-bridge";
 const LATEST_CAPTURE_PATH = path.join(DATA_DIR, "latest-capture.json");
 const LATEST_PICKED_PATH = path.join(DATA_DIR, "latest-picked-element.json");
+const LATEST_HANDOFF_PATH = path.join(DATA_DIR, "latest-handoff.json");
 
 export async function getExtensionCapture() {
-  const data = await readJson(LATEST_CAPTURE_PATH);
+  const data = await readLatestExtensionCapture();
   return {
     content: [
       {
@@ -20,7 +21,7 @@ export async function getExtensionCapture() {
 }
 
 export async function getPickedElement() {
-  const data = await readJson(LATEST_PICKED_PATH);
+  const data = await readLatestPickedElement();
   return {
     content: [
       {
@@ -29,6 +30,30 @@ export async function getPickedElement() {
       },
     ],
   };
+}
+
+export async function getLatestHandoff() {
+  const data = await readLatestHandoff();
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(data, null, 2),
+      },
+    ],
+  };
+}
+
+export async function readLatestExtensionCapture() {
+  return readJson(LATEST_CAPTURE_PATH);
+}
+
+export async function readLatestPickedElement() {
+  return readJson(LATEST_PICKED_PATH);
+}
+
+export async function readLatestHandoff() {
+  return readJson(LATEST_HANDOFF_PATH);
 }
 
 async function readJson(filePath: string) {

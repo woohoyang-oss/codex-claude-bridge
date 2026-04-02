@@ -11,6 +11,7 @@ This extension is the first UX layer on top of the CDP-first browser MCP stack.
 - starts an element picker overlay and stores the last picked selector
 - can push the last captured page payload to a local bridge URL
 - can push the last picked element payload to a local bridge URL
+- can create a Codex handoff payload containing the active tab, capture, picked element, and an operator note
 
 ## What it does not replace
 
@@ -49,3 +50,4 @@ Use it together with `browser-mcp` so Codex can read:
 
 - latest extension page capture
 - latest picked element
+- latest Codex handoff payload

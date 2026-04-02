@@ -9,10 +9,11 @@ import { assertVisible } from "./tools/assert-visible.js";
 import { getConsoleLogs } from "./tools/console-logs.js";
 import { getDomSummary } from "./tools/dom-summary.js";
 import { evalInPage } from "./tools/eval.js";
-import { getExtensionCapture, getPickedElement } from "./tools/extension-capture.js";
+import { getExtensionCapture, getLatestHandoff, getPickedElement } from "./tools/extension-capture.js";
 import { listTabs } from "./tools/list-tabs.js";
 import { navigate } from "./tools/navigate.js";
 import { getNetworkLogs } from "./tools/network-logs.js";
+import { assertPickedElementVisible, clickPickedElement, typeIntoPickedElement } from "./tools/picked-actions.js";
 import { press } from "./tools/press.js";
 import { runTestFlow } from "./tools/run-test-flow.js";
 import { selectTab } from "./tools/select-tab.js";
@@ -179,6 +180,15 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
+    "browser_get_latest_handoff",
+    {
+      description: "Return the latest Codex handoff payload stored by the extension bridge.",
+      inputSchema: {},
+    },
+    async () => getLatestHandoff()
+  );
+
+  server.registerTool(
     "browser_eval",
     {
       description: "Run a small JavaScript expression in page context and return its result.",
@@ -187,6 +197,38 @@ export async function startServer(): Promise<void> {
       },
     },
     async ({ expression }) => evalInPage(manager, { expression })
+  );
+
+  server.registerTool(
+    "browser_assert_picked_element_visible",
+    {
+      description: "Assert that the selector from the last extension-picked element is visible on the active page.",
+      inputSchema: {
+        timeoutMs: z.number().int().positive().optional().describe("Timeout in milliseconds."),
+      },
+    },
+    async ({ timeoutMs }) => assertPickedElementVisible(manager, { timeoutMs })
+  );
+
+  server.registerTool(
+    "browser_click_picked_element",
+    {
+      description: "Click the selector from the last extension-picked element.",
+      inputSchema: {},
+    },
+    async () => clickPickedElement(manager)
+  );
+
+  server.registerTool(
+    "browser_type_picked_element",
+    {
+      description: "Type into the selector from the last extension-picked element.",
+      inputSchema: {
+        text: z.string().describe("Text to type into the picked element."),
+        clearFirst: z.boolean().optional().describe("Clear the field before typing."),
+      },
+    },
+    async ({ text, clearFirst }) => typeIntoPickedElement(manager, { text, clearFirst })
   );
 
   server.registerTool(

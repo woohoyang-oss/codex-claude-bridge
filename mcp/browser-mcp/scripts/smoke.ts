@@ -115,6 +115,16 @@ async function main(): Promise<void> {
     name: "browser_get_picked_element",
     arguments: {},
   });
+  const latestHandoff = await client.callTool({
+    name: "browser_get_latest_handoff",
+    arguments: {},
+  });
+  const pickedVisible = await client.callTool({
+    name: "browser_assert_picked_element_visible",
+    arguments: {
+      timeoutMs: 5000,
+    },
+  });
 
   console.log(
     JSON.stringify(
@@ -133,6 +143,8 @@ async function main(): Promise<void> {
         flowResult,
         extensionCapture,
         pickedElement,
+        latestHandoff,
+        pickedVisible,
       },
       null,
       2

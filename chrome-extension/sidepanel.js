@@ -4,6 +4,7 @@ const elements = {
   captureOutput: document.querySelector("#capture-output"),
   pickedOutput: document.querySelector("#picked-output"),
   bridgeUrl: document.querySelector("#bridge-url"),
+  handoffNote: document.querySelector("#handoff-note"),
   bridgeStatus: document.querySelector("#bridge-status"),
   refreshTab: document.querySelector("#refresh-tab"),
   capturePage: document.querySelector("#capture-page"),
@@ -13,6 +14,7 @@ const elements = {
   saveBridgeUrl: document.querySelector("#save-bridge-url"),
   pushBridge: document.querySelector("#push-bridge"),
   pushPicked: document.querySelector("#push-picked"),
+  createHandoff: document.querySelector("#create-handoff"),
 };
 
 boot();
@@ -38,6 +40,7 @@ function bindEvents() {
   );
   elements.pushBridge.addEventListener("click", () => void pushBridge());
   elements.pushPicked.addEventListener("click", () => void pushPickedElement());
+  elements.createHandoff.addEventListener("click", () => void createHandoff());
 }
 
 async function refreshView() {
@@ -94,6 +97,18 @@ async function pushPickedElement() {
     return;
   }
   elements.bridgeStatus.textContent = `Picked element push succeeded (${result.status} ${result.statusText}).`;
+}
+
+async function createHandoff() {
+  const result = await sendRuntimeMessage({
+    type: "bridge:create-handoff",
+    note: elements.handoffNote.value.trim(),
+  });
+  if (!result.ok) {
+    elements.bridgeStatus.textContent = result.error || "Codex handoff creation failed.";
+    return;
+  }
+  elements.bridgeStatus.textContent = `Codex handoff stored (${result.status} ${result.statusText}).`;
 }
 
 async function sendRuntimeMessage(message) {

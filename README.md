@@ -87,6 +87,7 @@ Current extension bridge outputs available to browser-mcp:
 
 - latest extension page capture
 - latest picked element
+- latest Codex handoff payload
 
 Shared bridge data directory:
 
