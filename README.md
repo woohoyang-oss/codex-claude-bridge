@@ -1,62 +1,108 @@
-# Codex to Claudex Bootstrap
+# Codex Claude Bridge
 
-This repository is a small bootstrap layer that makes a Codex workspace feel closer to a Claude Code workflow.
+Make Codex feel closer to a Claude-style browser-connected coding workflow.
 
-The current primary build target is a browser-control stack so Codex can inspect, debug, and test real Chrome sessions more like Claude's browser-connected workflows.
+This repository is no longer just a bootstrap. It now includes a working browser stack:
 
-## Goal
+- `Claudex` bootstrap for Codex-style local runtime
+- `browser-mcp` for live Chrome CDP control
+- a Chrome extension side panel for page capture and element picking
+- a local bridge queue for handoff and action-request packets
+- a Codex inbox relay that exports those packets into file-based work items
 
-When this repository is opened in Codex, it should quickly establish the intended working mode:
+## What already works
 
-- Claude-style agentic coding workflow
-- local Claudex runtime available on demand
-- short, execution-focused operating rules
-- reproducible setup scripts instead of manual copy-paste
+Current implemented flow:
 
-## What this repo provides
+1. Capture the current page in the Chrome extension
+2. Pick a live DOM element from the page
+3. Create a `handoff` or `action request` in the extension side panel
+4. Store that request in the local bridge inbox queue
+5. Consume it from `browser-mcp`
+6. Run browser actions such as click, type, assert-visible, navigate, screenshot, and DOM inspection
+7. Export queue items into file-based Codex inbox packets
+8. Archive completed packets automatically
 
-- `AGENTS.md`
-  Codex-facing operating rules so the workspace communicates the intended behavior clearly.
-- `CLAUDEX_MODE.md`
-  A compact runbook describing the local runtime and working style.
-- `setup-claudex.sh`
-  Clones or updates Claudex locally, installs dependencies, and builds it.
-- `run-claudex.sh`
-  Starts the local Claudex runtime with the recommended Codex-backed model.
-- `launch-chrome-debug.sh`
-  Starts a local Chrome instance with remote debugging enabled for the browser MCP.
-- `run-extension-bridge.sh`
-  Starts the local HTTP bridge that receives page captures from the Chrome extension.
-- `run-browser-lab.sh`
-  Starts the local deterministic demo page used to validate click/type action requests.
-- `run-codex-inbox-relay.sh`
-  Starts the local relay that exports bridge inbox items into file-based Codex inbox packets.
-- `docs/architecture.md`
-  Defines the Codex-to-Claude bridge architecture for this workspace.
-- `docs/browser-mcp-mvp.md`
-  Defines the first browser MCP milestone and tool contracts.
-- `docs/chrome-extension-plan.md`
-  Defines how a future Chrome extension should complement the MCP layer instead of replacing it.
-- `chrome-extension/`
-  Unpacked Chrome extension scaffold with side panel, page capture, and element picker.
-- `bridge/extension-bridge/`
-  Local bridge service that persists extension capture payloads for browser-mcp.
-- `bridge/codex-inbox-relay/`
-  Local relay that converts bridge inbox items into `.json` and `.md` Codex inbox packets.
-- `demo/browser-lab/`
-  Local browser lab page for deterministic action-request testing.
-- `.mcp.json.example`
-  Sample MCP server registration for the local browser MCP.
+In practice, this means the repo already supports:
 
-## Browser MCP next step
+- Chrome CDP browser control
+- browser debugging with console logs and network logs
+- structured browser test flows
+- extension-driven page capture
+- extension-driven picked-element workflows
+- queue-based handoff and action-request processing
+- file-based Codex inbox packet generation
 
-The first executable implementation lives under:
+## Architecture
 
-```bash
-/Users/wooho/Documents/Playground/mcp/browser-mcp
+Main runtime path:
+
+```text
+Chrome Extension
+  -> extension-bridge
+  -> inbox.json
+  -> browser-mcp
+  -> Codex / Claudex
 ```
 
-Current tool surface:
+File export path:
+
+```text
+Chrome Extension
+  -> extension-bridge inbox
+  -> codex-inbox-relay
+  -> codex-inbox/open
+  -> codex-inbox/done
+```
+
+Core directories:
+
+- `chrome-extension/`
+  Unpacked Chrome extension with side panel, capture UI, picker UI, and inbox controls
+- `bridge/extension-bridge/`
+  Local HTTP bridge for capture payloads, picked elements, handoffs, and action requests
+- `bridge/codex-inbox-relay/`
+  Relay that exports bridge inbox items into file-based Codex packets
+- `mcp/browser-mcp/`
+  Chrome/CDP MCP server used by Codex
+- `demo/browser-lab/`
+  Deterministic local test page for click/type/action-request smoke tests
+- `docs/`
+  Architecture and planning docs
+
+## Chrome Extension
+
+The Chrome extension is the browser-native UX layer.
+
+Current extension features:
+
+- side panel UI
+- active-tab display
+- page-context capture
+- element picker overlay
+- push latest capture to local bridge
+- push picked element to local bridge
+- create Codex handoff payloads
+- create picked-element action requests
+- inspect recent inbox items
+- claim or complete inbox items directly from the side panel
+
+Load it in Chrome:
+
+1. Open `chrome://extensions`
+2. Turn on `Developer mode`
+3. Click `Load unpacked`
+4. Select `/Users/wooho/Documents/Playground/chrome-extension`
+
+Extension docs:
+
+- `chrome-extension/README.md`
+
+## Browser MCP
+
+`browser-mcp` is the real browser control plane.
+
+Current tool surface includes:
 
 - `browser_list_tabs`
 - `browser_select_tab`
@@ -70,42 +116,46 @@ Current tool surface:
 - `browser_get_console_logs`
 - `browser_get_network_logs`
 - `browser_get_dom_summary`
+- `browser_get_extension_capture`
+- `browser_get_picked_element`
+- `browser_get_latest_handoff`
+- `browser_get_latest_action_request`
+- `browser_list_inbox_items`
+- `browser_get_next_inbox_item`
+- `browser_claim_inbox_item`
+- `browser_complete_inbox_item`
+- `browser_run_next_action_request`
+- `browser_run_next_handoff`
 - `browser_eval`
+- `browser_assert_picked_element_visible`
+- `browser_click_picked_element`
+- `browser_type_picked_element`
+- `browser_run_latest_action_request`
 - `browser_assert_text`
 - `browser_assert_visible`
 - `browser_run_test_flow`
 
-## Chrome extension
+Browser MCP docs:
 
-The repository now also includes an unpacked Chrome extension at:
+- `mcp/browser-mcp/README.md`
 
-```bash
-/Users/wooho/Documents/Playground/chrome-extension
-```
+## Local Bridge And Relay
 
-Current extension features:
-
-- side panel
-- active-tab display
-- page-context capture
-- element picker overlay
-- optional push to a local bridge URL
-
-Current extension bridge outputs available to browser-mcp:
-
-- latest extension page capture
-- latest picked element
-- latest Codex handoff payload
-- latest picked-element action request
-- queued inbox items for handoff and action-request workflows
-
-Shared bridge data directory:
+The extension bridge stores browser-native events under:
 
 ```text
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge
 ```
 
-File-based Codex inbox packets are exported under:
+Important bridge outputs:
+
+- `latest-capture.json`
+- `latest-picked-element.json`
+- `latest-handoff.json`
+- `latest-action-request.json`
+- `inbox.json`
+
+The Codex inbox relay exports packets under:
 
 ```text
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/open
@@ -117,25 +167,79 @@ Completed packets are archived under:
 /Users/wooho/Documents/Playground/.runtime/codex-claude-bridge/codex-inbox/done
 ```
 
-## Quick start
+Bridge docs:
+
+- `bridge/extension-bridge/README.md`
+- `bridge/codex-inbox-relay/README.md`
+
+## Quick Start
+
+Bootstrap Claudex:
 
 ```bash
 ./setup-claudex.sh
 ./run-claudex.sh
 ```
 
-## Recommended behavior in Codex
+Run the browser stack:
 
-Use this repository as a persistent hint that Codex should behave like a Claude-style coding agent:
+```bash
+./launch-chrome-debug.sh
+./run-extension-bridge.sh
+./run-codex-inbox-relay.sh
+./run-browser-lab.sh
+```
 
-- inspect first, edit second
-- prefer doing the work over describing the work
-- continue through implementation and verification when possible
-- treat review requests as bug and regression hunts first
-- ask only when a decision is risky or materially ambiguous
+Run browser MCP:
+
+```bash
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm install
+npm run build
+npm run dev
+```
+
+## Verification
+
+Implemented smoke flows:
+
+- `npm run smoke`
+  General CDP/browser MCP smoke
+- `npm run smoke:action-demo`
+  Picked-element action request demo against the local browser lab
+- `npm run smoke:inbox`
+  Inbox queue flow including claim, complete, action execution, and handoff execution
+- `node /Users/wooho/Documents/Playground/scripts/smoke-codex-inbox-relay.mjs`
+  Codex inbox packet export and archive flow
+
+## Workspace Files
+
+Bootstrap and operating files:
+
+- `AGENTS.md`
+- `CLAUDEX_MODE.md`
+- `setup-claudex.sh`
+- `run-claudex.sh`
+- `.mcp.json`
+- `.mcp.json.example`
+
+Planning and architecture:
+
+- `docs/architecture.md`
+- `docs/browser-mcp-mvp.md`
+- `docs/chrome-extension-plan.md`
+
+## Current Goal
+
+The main goal is still the same:
+
+- make Codex feel closer to Claude's browser-connected workflow
+- keep Chrome/CDP as the primary control layer
+- use the Chrome extension as the native UX layer
+- move toward a workflow where browser-side intent becomes Codex work automatically
 
 ## Notes
 
-- The local `claudex/` directory is ignored on purpose so this repo stays lightweight.
+- The local `claudex/` directory is ignored on purpose so the repo stays lightweight.
 - Codex authentication is expected through `~/.codex/auth.json`.
 - Default model is `codexplan`.
