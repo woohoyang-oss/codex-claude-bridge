@@ -35,6 +35,99 @@ This extension does not replace:
 3. Click `Load unpacked`
 4. Select `/Users/wooho/Documents/Playground/chrome-extension`
 
+## Before you use it
+
+Start the local services from the workspace root:
+
+```bash
+/Users/wooho/Documents/Playground/launch-chrome-debug.sh
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+/Users/wooho/Documents/Playground/run-codex-inbox-relay.sh
+/Users/wooho/Documents/Playground/run-browser-inbox-worker.sh
+```
+
+Optional local demo page:
+
+```bash
+/Users/wooho/Documents/Playground/run-browser-lab.sh
+```
+
+The browser worker is optional if you want to inspect queue items manually before running them.
+
+## How to use it after install
+
+### 1. Open the side panel
+
+- click the extension icon in Chrome
+- the side panel opens because the extension enables `openPanelOnActionClick`
+
+### 2. Capture the current page
+
+- open any page you want to inspect
+- click `Capture Page Context`
+- the side panel stores the current page summary locally
+- click `Copy JSON` if you want the raw captured payload
+
+### 3. Pick an element from the page
+
+- click `Start Element Picker`
+- move over the page and choose a target element
+- the picked selector is saved in the side panel
+- click `Stop Picker` when you are done
+
+### 4. Push raw browser context to the bridge
+
+- click `Push Last Capture` to store the latest page capture in the bridge
+- click `Push Picked Element` to store the latest selected element in the bridge
+
+This is useful when you want `browser-mcp` to read the raw browser-native payloads directly.
+
+### 5. Create a Codex handoff
+
+- enter a note in `Codex handoff note`
+- click `Create Codex Handoff`
+
+This creates a queue item that includes:
+
+- active tab metadata
+- captured page context
+- picked element, if available
+- your operator note
+
+### 6. Create an action request
+
+- choose `Assert Visible`, `Click`, or `Type`
+- if you choose `Type`, enter text in `Action text`
+- optionally add an operator note
+- click `Create Action Request`
+
+This creates a queue item that tells the browser worker or `browser-mcp` what to do with the picked element.
+
+### 7. Watch queue state
+
+The side panel inbox section shows recent items and their status:
+
+- `pending`
+- `claimed`
+- `completed`
+- `failed`
+
+You can also click:
+
+- `Claim`
+- `Complete`
+
+directly from the side panel for basic queue control.
+
+### 8. Let the worker process requests
+
+If `run-browser-inbox-worker.sh` is running, it will automatically try to consume pending:
+
+- action requests
+- handoffs
+
+If a request fails, it can move to `failed` and be retried later through the queue tools.
+
 ## Expected workflow
 
 1. Use the side panel to capture the current page or pick an element
@@ -55,3 +148,4 @@ Use it together with `browser-mcp` so Codex can read:
 - latest picked element
 - latest Codex handoff payload
 - latest picked-element action request
+- inbox queue items

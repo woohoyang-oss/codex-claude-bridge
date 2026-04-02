@@ -2,6 +2,20 @@
 
 Make Codex feel closer to a Claude-style browser-connected coding workflow.
 
+## Status
+
+Current state: `working browser MVP`
+
+Already implemented and verified:
+
+- Chrome extension side panel
+- live Chrome CDP control through `browser-mcp`
+- page capture and picked-element handoff
+- queue-based handoff and action-request processing
+- file-based Codex inbox packet export
+- archive flow for completed packets
+- browser worker with fail and retry handling
+
 This repository is no longer just a bootstrap. It now includes a working browser stack:
 
 - `Claudex` bootstrap for Codex-style local runtime
@@ -33,6 +47,16 @@ In practice, this means the repo already supports:
 - extension-driven picked-element workflows
 - queue-based handoff and action-request processing
 - file-based Codex inbox packet generation
+- automatic worker-based queue draining
+- failed-item retry for browser work
+
+## Primary Use Cases
+
+- search in a real browser and extract result data
+- inspect live DOM, console logs, network logs, and screenshots
+- pick an element in the Chrome extension and turn it into a browser action
+- send browser-native handoff packets into Codex-style work queues
+- run deterministic browser demos and smoke tests locally
 
 ## Architecture
 
@@ -88,6 +112,17 @@ Current extension features:
 - inspect recent inbox items
 - claim or complete inbox items directly from the side panel
 
+After installation, the typical usage flow is:
+
+1. Open a target page in Chrome
+2. Open the extension side panel
+3. Click `Capture Page Context` if you want the current page JSON
+4. Click `Start Element Picker` and choose a visible element if you want a selector-based action
+5. Optionally click `Push Last Capture` or `Push Picked Element` to store raw browser context
+6. Enter a handoff note or action request in the side panel
+7. Click `Create Codex Handoff` or `Create Action Request`
+8. Let `browser-mcp` or the worker process the queue
+
 Load it in Chrome:
 
 1. Open `chrome://extensions`
@@ -139,6 +174,13 @@ Current tool surface includes:
 Browser MCP docs:
 
 - `mcp/browser-mcp/README.md`
+
+The easiest control loop is:
+
+1. `./launch-chrome-debug.sh`
+2. `./run-extension-bridge.sh`
+3. `./run-browser-inbox-worker.sh`
+4. Use the extension side panel to create new work items
 
 ## Local Bridge And Relay
 
@@ -200,6 +242,23 @@ npm install
 npm run build
 npm run dev
 ```
+
+## Source Of Truth
+
+Main implementation areas:
+
+- `chrome-extension/`
+- `bridge/extension-bridge/`
+- `bridge/codex-inbox-relay/`
+- `mcp/browser-mcp/`
+
+Recent pushed commits:
+
+- `5202fbc` Add inbox retry flow
+- `f78ca36` Add browser inbox worker
+- `80e023a` Refresh main README with browser stack details
+- `89e3d9e` Archive completed Codex inbox packets
+- `e1f1420` Add Codex inbox relay service
 
 ## Verification
 
