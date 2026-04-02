@@ -11,7 +11,7 @@ type InboxItem = {
   [key: string]: unknown;
 };
 
-export async function markInboxItem(args: { itemId: string; status: "claimed" | "completed" }) {
+export async function markInboxItem(args: { itemId: string; status: "claimed" | "completed" | "failed" }) {
   const updated = await updateInboxItemStatus(args);
   return {
     content: [
@@ -30,7 +30,7 @@ export async function markInboxItem(args: { itemId: string; status: "claimed" | 
   };
 }
 
-export async function updateInboxItemStatus(args: { itemId: string; status: "claimed" | "completed" }) {
+export async function updateInboxItemStatus(args: { itemId: string; status: "claimed" | "completed" | "failed" }) {
   const inbox = await readInbox();
   const items: InboxItem[] = Array.isArray(inbox?.items) ? (inbox.items as InboxItem[]) : [];
   const nextItems = items.map((item: InboxItem) =>

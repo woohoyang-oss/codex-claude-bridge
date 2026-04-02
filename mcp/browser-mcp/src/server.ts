@@ -230,7 +230,7 @@ export async function startServer(): Promise<void> {
     {
       description: "Return the next queued extension bridge inbox item, optionally filtered by status.",
       inputSchema: {
-        status: z.string().optional().describe("Optional status filter such as pending, claimed, completed."),
+        status: z.string().optional().describe("Optional status filter such as pending, claimed, completed, failed."),
         kind: z.string().optional().describe("Optional kind filter such as handoff or action_request."),
       },
     },
@@ -257,6 +257,17 @@ export async function startServer(): Promise<void> {
       },
     },
     async ({ itemId }) => markInboxItem({ itemId, status: "completed" })
+  );
+
+  server.registerTool(
+    "browser_fail_inbox_item",
+    {
+      description: "Mark an extension bridge inbox item as failed after an execution error.",
+      inputSchema: {
+        itemId: z.string().describe("Inbox item id from browser_list_inbox_items or browser_get_next_inbox_item."),
+      },
+    },
+    async ({ itemId }) => markInboxItem({ itemId, status: "failed" })
   );
 
   server.registerTool(

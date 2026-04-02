@@ -9,6 +9,7 @@ This repository is no longer just a bootstrap. It now includes a working browser
 - a Chrome extension side panel for page capture and element picking
 - a local bridge queue for handoff and action-request packets
 - a Codex inbox relay that exports those packets into file-based work items
+- a browser inbox worker that drains pending requests automatically
 
 ## What already works
 
@@ -188,6 +189,7 @@ Run the browser stack:
 ./run-extension-bridge.sh
 ./run-codex-inbox-relay.sh
 ./run-browser-lab.sh
+./run-browser-inbox-worker.sh --once
 ```
 
 Run browser MCP:
@@ -209,6 +211,8 @@ Implemented smoke flows:
   Picked-element action request demo against the local browser lab
 - `npm run smoke:inbox`
   Inbox queue flow including claim, complete, action execution, and handoff execution
+- `npm run smoke:worker`
+  Worker flow that drains pending action requests and handoffs from the queue
 - `node /Users/wooho/Documents/Playground/scripts/smoke-codex-inbox-relay.mjs`
   Codex inbox packet export and archive flow
 

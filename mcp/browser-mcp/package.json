@@ -8,9 +8,11 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
+    "worker": "tsx scripts/inbox-worker.ts",
     "smoke": "tsx scripts/smoke.ts",
     "smoke:action-demo": "tsx scripts/smoke-action-demo.ts",
-    "smoke:inbox": "tsx scripts/smoke-inbox.ts"
+    "smoke:inbox": "tsx scripts/smoke-inbox.ts",
+    "smoke:worker": "tsx scripts/smoke-worker.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

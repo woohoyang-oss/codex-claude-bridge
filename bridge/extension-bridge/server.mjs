@@ -126,8 +126,8 @@ const server = http.createServer(async (req, res) => {
       if (!itemId) {
         return json(res, 400, { ok: false, error: "itemId is required" });
       }
-      if (status !== "claimed" && status !== "completed") {
-        return json(res, 400, { ok: false, error: "status must be claimed or completed" });
+      if (status !== "claimed" && status !== "completed" && status !== "failed") {
+        return json(res, 400, { ok: false, error: "status must be claimed, completed, or failed" });
       }
       const updated = await markInboxItem(itemId, status);
       return json(res, 200, { ok: true, item: updated });

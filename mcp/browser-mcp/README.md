@@ -26,6 +26,7 @@ This first version includes:
 - `browser_get_next_inbox_item`
 - `browser_claim_inbox_item`
 - `browser_complete_inbox_item`
+- `browser_fail_inbox_item`
 - `browser_run_next_action_request`
 - `browser_run_next_handoff`
 - `browser_eval`
@@ -83,6 +84,13 @@ npm run build
 npm start
 ```
 
+Run the inbox worker:
+
+```bash
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm run worker -- --once
+```
+
 ## Smoke test
 
 After Chrome is available on port `9222`:
@@ -110,6 +118,15 @@ Inbox demo:
 cd /Users/wooho/Documents/Playground/mcp/browser-mcp
 npm run build
 npm run smoke:inbox
+```
+
+Worker demo:
+
+```bash
+/Users/wooho/Documents/Playground/run-extension-bridge.sh
+cd /Users/wooho/Documents/Playground/mcp/browser-mcp
+npm run build
+npm run smoke:worker
 ```
 
 ## Extension bridge
